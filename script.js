@@ -14,7 +14,7 @@ const defaultPlayers = [
     { name: '비행돼지', cost: 2, tier: 'D' }, { name: '멋사', cost: 2, tier: 'D' }, { name: '모잉', cost: 2, tier: 'D' },
     { name: '오뉴', cost: 2, tier: 'D' }, { name: '두뭉', cost: 1, tier: 'F' }, { name: '푸린', cost: 1, tier: 'F' },
     { name: '치카', cost: 1, tier: 'F' }, { name: '냐미', cost: 1, tier: 'F' }, { name: '샘웨', cost: 1, tier: 'F' },
-    { name: '나리땽', cost: 1, tier: 'F' } 
+    { name: '나리땽', cost: 1, tier: 'F' } ,{ name: '꽃핀', cost:1, tier:'F'}
 ];
 const defaultTeams = [ { id: 1, name: 'Team 1', members: [], cost: 0 }, { id: 2, name: 'Team 2', members: [], cost: 0 }, { id: 3, name: 'Team 3', members: [], cost: 0 }, { id: 4, name: 'Team 4', members: [], cost: 0 }, { id: 5, name: 'Team 5', members: [], cost: 0 }, { id: 6, name: 'Team 6', members: [], cost: 0 } ];
 let players;
@@ -166,3 +166,4 @@ document.addEventListener('DOMContentLoaded', () => {
     setupDropZones(); 
     renderAll(); 
 });
+
