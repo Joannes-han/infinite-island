@@ -1,18 +1,20 @@
 // 참석자 명단 + 밸런스 자동 배정 + 코스트 제한 X (4팀 / 팀3명제한)
-const defaultPlayers = [ /* 선수 목록 */ { name: '피닉스박', cost: 8, tier: 'SSR' }, { name: '민식박', cost: 7, tier: 'SR' }, { name: '갱맘', cost: 7, tier: 'SR' }, { name: '이로', cost: 7, tier: 'SR' }, { name: '검멋', cost: 7, tier: 'SR' }, { name: '행수', cost: 7, tier: 'SR' }, { name: '이비스', cost: 6, tier: 'S' }, { name: '자연', cost: 6, tier: 'S' }, { name: '황블린', cost: 6, tier: 'S' }, { name: '모카형', cost: 6, tier: 'S' }, { name: '피아노캣', cost: 6, tier: 'S' }, { name: '후참', cost: 5, tier: 'A' }, { name: '방찌', cost: 5, tier: 'A' }, { name: '유세라', cost: 5, tier: 'A' }, { name: '앰비션', cost: 5, tier: 'A' }, { name: '김뿡', cost: 5, tier: 'A' }, { name: '후니', cost: 5, tier: 'A' }, { name: '농루트', cost: 4, tier: 'B' }, { name: '잭잭', cost: 4, tier: 'B' }, { name: '감규리', cost: 4, tier: 'B' }, { name: '유토링', cost: 4, tier: 'B' }, { name: '천시아', cost: 4, tier: 'B' }, { name: '찬우정', cost: 4, tier: 'B' }, { name: '왈도쿤', cost: 3, tier: 'C' }, { name: '방캐', cost: 3, tier: 'C' }, { name: '쾅준', cost: 3, tier: 'C' }, { name: '헤징', cost: 3, tier: 'C' }, { name: '삐부', cost: 3, tier: 'C' }, { name: '고차비', cost: 3, tier: 'C' }, { name: '캡틴잭', cost: 3, tier: 'C' }, { name: '다비', cost: 3, tier: 'C' }, { name: '이선', cost: 3, tier: 'C' }, { name: '순당무', cost: 3, tier: 'C' }, { name: '비행돼지', cost: 2, tier: 'D' }, { name: '멋사', cost: 2, tier: 'D' }, { name: '모잉', cost: 2, tier: 'D' }, { name: '오뉴', cost: 2, tier: 'D' }, { name: '두뭉', cost: 1, tier: 'E' }, { name: '푸린', cost: 1, tier: 'E' }, { name: '치카', cost: 1, tier: 'E' }, { name: '냐미', cost: 1, tier: 'E' }, { name: '샘웨', cost: 1, tier: 'E' }, { name: '나리땽', cost: 1, tier: 'E' } ];
+const defaultPlayers = [ /* 선수 목록 */ { name: '피닉스박', cost: 8, tier: 'SSS' }, { name: '민식박', cost: 7, tier: 'SS' }, { name: '갱맘', cost: 7, tier: 'SS' }, { name: '이로', cost: 7, tier: 'SS' }, { name: '검멋', cost: 7, tier: 'SS' }, { name: '행수', cost: 7, tier: 'SS' }, { name: '이비스', cost: 6, tier: 'S' }, { name: '자연', cost: 6, tier: 'S' }, { name: '황블린', cost: 6, tier: 'S' }, { name: '모카형', cost: 6, tier: 'S' }, { name: '피아노캣', cost: 6, tier: 'S' }, { name: '후참', cost: 5, tier: 'A' }, { name: '방찌', cost: 5, tier: 'A' }, { name: '유세라', cost: 5, tier: 'A' }, { name: '앰비션', cost: 5, tier: 'A' }, { name: '김뿡', cost: 5, tier: 'A' }, { name: '후니', cost: 5, tier: 'A' }, { name: '농루트', cost: 4, tier: 'B' }, { name: '잭잭', cost: 4, tier: 'B' }, { name: '감규리', cost: 4, tier: 'B' }, { name: '유토링', cost: 4, tier: 'B' }, { name: '천시아', cost: 4, tier: 'B' }, { name: '찬우정', cost: 4, tier: 'B' }, { name: '왈도쿤', cost: 3, tier: 'C' }, { name: '방캐', cost: 3, tier: 'C' }, { name: '쾅준', cost: 3, tier: 'C' }, { name: '헤징', cost: 3, tier: 'C' }, { name: '삐부', cost: 3, tier: 'C' }, { name: '고차비', cost: 3, tier: 'C' }, { name: '캡틴잭', cost: 3, tier: 'C' }, { name: '다비', cost: 3, tier: 'C' }, { name: '이선', cost: 3, tier: 'C' }, { name: '순당무', cost: 3, tier: 'C' }, { name: '비행돼지', cost: 2, tier: 'D' }, { name: '멋사', cost: 2, tier: 'D' }, { name: '모잉', cost: 2, tier: 'D' }, { name: '오뉴', cost: 2, tier: 'D' }, { name: '두뭉', cost: 1, tier: 'F' }, { name: '푸린', cost: 1, tier: 'F' }, { name: '치카', cost: 1, tier: 'F' }, { name: '냐미', cost: 1, tier: 'F' }, { name: '샘웨', cost: 1, tier: 'F' }, { name: '나리땽', cost: 1, tier: 'F' } ];
 const defaultTeams = [ 
     { id: 1, name: 'Team 1', members: [], cost: 0 },
     { id: 2, name: 'Team 2', members: [], cost: 0 },
     { id: 3, name: 'Team 3', members: [], cost: 0 },
-    { id: 4, name: 'Team 4', members: [], cost: 0 }
-    // [수정] 5, 6팀 제거 (사용자님이 주신 코드 기준)
+    { id: 4, name: 'Team 4', members: [], cost: 0 },
+    { id: 5, name: 'Team 5', members: [], cost: 0 },
+    { id: 6, name: 'Team 6', members: [], cost: 0 }
+   
 ];
 let players; 
 let allTeams; 
 let activeTeamId = null;
 let attendingPlayers = new Set(); 
 const MAX_MEMBERS_PER_TEAM = 3; 
-// [수정] MAX_COST는 코스트 제한이 없으므로 주석 처리 (표시용 값은 renderTeamBoxes에서 직접 사용)
+//  MAX_COST는 코스트 제한이 없으므로 주석 처리 (표시용 값은 renderTeamBoxes에서 직접 사용)
 // const MAX_COST = 15; 
 
 function saveData() { try { localStorage.setItem('savedPlayers', JSON.stringify(players)); localStorage.setItem('savedTeams', JSON.stringify(allTeams)); localStorage.setItem('savedAttendees', JSON.stringify(Array.from(attendingPlayers))); } catch (e) { console.error("Error saving data:", e); } }
@@ -76,7 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
         groups.forEach(group => group.innerHTML = '');
         attendeeCountSpan.textContent = attendingPlayers.size;
 
-        // [수정] 선수 정렬: 참석자 우선, 그 다음 이름순
+        //  선수 정렬: 참석자 우선, 그 다음 이름순
         const sortedPlayers = [...players].sort((a, b) => {
             const aAttending = attendingPlayers.has(a.name);
             const bAttending = attendingPlayers.has(b.name);
@@ -159,3 +161,4 @@ document.addEventListener('DOMContentLoaded', () => {
     setupDropZones(); 
     renderAll(); 
 });
+
