@@ -65,15 +65,7 @@ hr { display: none; }
 #player-list { display: flex; flex-direction: column; gap: 15px; }
 .tier-group { background-color: #202020; border: 1px solid #444; border-radius: 8px; padding: 10px 15px; transition: background-color 0.2s; flex-shrink: 0; }
 .tier-group h3 { margin-top: 5px; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #555; font-size: 1.2em; color: #eee; }
-
-/* [수정] flex -> grid로 변경 */
-.player-button-group {
-    display: grid;
-    /* 최소 160px 너비를 기준으로, 공간이 남으면 1fr 비율로 채움 */
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 8px;
-    min-height: 30px;
-}
+.player-button-group { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; min-height: 30px; }
 .player-button-group.drag-over { background-color: #333; border: 1px dashed #61dafb; }
 
 /* 선수 아이템 (체크박스 + 버튼) */
@@ -88,9 +80,17 @@ hr { display: none; }
 .player-button.dragging { opacity: 0.4; border: 2px dashed white; }
 .delete-player-btn { position: absolute; top: -1px; right: 0; width: 20px; height: 100%; line-height: 28px; text-align: center; color: #aaa; font-size: 1.2em; font-weight: bold; border-radius: 0 4px 4px 0; transition: background-color 0.2s, color 0.2s; }
 .delete-player-btn:hover { background-color: #e74c3c; color: white; }
-.tier-SSR { border-color: #ffd700; } .tier-SR { border-color: #e74c3c; }
-.tier-S  { border-color: #3498db; } .tier-A  { border-color: #9b59b6; }
-.tier-B  { border-color: #2ecc71; }
+
+/* [수정] 부모 컨테이너의 data-tier 속성을 사용하도록 셀렉터 변경 */
+[data-tier="SSS"] .player-button { border-color: #ffd700; }
+[data-tier="SS"] .player-button  { border-color: #e74c3c; }
+[data-tier="S"] .player-button   { border-color: #3498db; }
+[data-tier="A"] .player-button   { border-color: #9b59b6; }
+[data-tier="B"] .player-button   { border-color: #2ecc71; }
+[data-tier="C"] .player-button   { border-color: #f39c12; } /* C 티어 추가 (주황색) */
+[data-tier="D"] .player-button   { border-color: #bdc3c7; }
+[data-tier="F"] .player-button   { border-color: #95a5a6; }
+
 .player-button.selected { background-color: #e74c3c; border-color: #e74c3c; color: white; opacity: 0.5; cursor: not-allowed; text-decoration: line-through; }
 .player-button.disabled { background-color: #3a3a3a; border-color: #3a3a3a; color: #777; opacity: 0.6; cursor: not-allowed; }
 .player-button.selected .delete-player-btn, .player-button.disabled .delete-player-btn { display: none; }
