@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>팀 조합기 (주최자용)</title>
+    <title>무한섬 팀 배정 페이지지</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     
     <style>
@@ -166,7 +166,7 @@
     </style>
 </head>
 <body>
-    <h1>팀 조합 챌린지 (주최자용)</h1>
+    <h1>무한섬 팀 배정정</h1>
     
     <div class="main-container">
 
@@ -241,7 +241,7 @@
         </div>
 
     </div> <script>
-        // 사용자님이 주신 JavaScript 코드 (4팀 / 15코스트 / 팀3명제한 / 자동배정X)
+       
         const defaultPlayers = [
             { name: '피닉스박', cost: 8, tier: 'SSR' },
             { name: '민식박', cost: 7, tier: 'SR' }, { name: '갱맘', cost: 7, tier: 'SR' },
@@ -394,7 +394,7 @@
                 });
             });
 
-            // --- [신규] 텍스트 복사 버튼 ---
+            // ---  텍스트 복사 버튼 ---
             copyTeamsButton.addEventListener('click', () => {
                 let teamsText = '';
                 allTeams.forEach(team => {
@@ -407,10 +407,10 @@
                     teamsText += '\n\n'; // 팀 사이에 빈 줄 추가
                 });
 
-                // 클립보드에 복사 (Clipboard API 사용)
+                // 클립보드에 복사
                 navigator.clipboard.writeText(teamsText.trim())
                     .then(() => {
-                        // 복사 성공 시 버튼 텍스트 변경 (피드백)
+                        // 복사 성공 시 버튼 텍스트 변경 
                         const originalText = copyTeamsButton.textContent;
                         copyTeamsButton.textContent = '✅ 복사 완료!';
                         copyTeamsButton.classList.add('copied');
@@ -649,3 +649,4 @@
     </script> 
 </body>
 </html>
+
