@@ -353,7 +353,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // 팀 컨테이너 클릭 (팀 활성화, 선수 제거, 팀 제거 등)
-    // '팀 비우기'시 activeId 유지, '팀 삭제'시 예외처리 보강
+    // [★수정★] '팀 비우기'시 activeId 유지, '팀 삭제'시 이름 재정렬
     allTeamsContainer.addEventListener('click', (event) => { 
         // 1. 팀에서 선수 제거
         const clickedMember = event.target.closest('.team-member'); 
@@ -375,7 +375,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return; 
         } 
         
-        // 2. 팀 비우기 
+        // 2. 팀 비우기 [activeTeamId 변경 로직 삭제]
         const clearButton = event.target.closest('.clear-team-button'); 
         if (clearButton) { 
             const teamBox = event.target.closest('.team-box'); 
@@ -390,17 +390,25 @@ document.addEventListener('DOMContentLoaded', () => {
             return; 
         } 
         
-        // 3. 팀 삭제 
+        // 3. 팀 삭제 [수정: 팀 이름(Team 1, 2...) 재정렬 기능 추가]
         const removeButton = event.target.closest('.remove-team-button'); 
         if (removeButton) { 
             const teamBox = event.target.closest('.team-box'); 
             const teamId = parseInt(teamBox.dataset.teamId); 
             
+            // 1. 해당 팀을 배열에서 삭제
             allTeams = allTeams.filter(t => t.id !== teamId); 
+            
+            // [★추가★] 2. 남아있는 모든 팀의 이름을 'Team 1', 'Team 2' ... 순으로 다시 매김
+            allTeams.forEach((team, index) => {
+                team.name = `Team ${index + 1}`;
+            });
+            
+            // 3. 만약 삭제한 팀이 활성화된 팀이었다면, 첫 번째 팀을 활성화
             if (activeTeamId === teamId) { 
-                // 팀이 삭제되었으므로, 활성화 팀을 다른 곳으로 옮깁니다.
                 activeTeamId = allTeams.length > 0 ? allTeams[0].id : null; 
             } 
+            
             saveData(); 
             renderAll(); 
             return; 
