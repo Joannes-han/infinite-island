@@ -135,3 +135,55 @@ hr { display: none; }
     /* 부드럽게 사라지는 효과 (JS와 연동) */
     transition: opacity 0.5s ease-out; 
 }
+
+/* [★추가★] a 태그가 버튼처럼 보이도록 하는 스타일 */
+.button-link {
+    border: none;
+    padding: 8px 12px;
+    font-size: 0.9em;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    text-decoration: none; /* 링크 밑줄 제거 */
+    color: white; /* 글자색 */
+}
+
+/* 새 점수 계산 버튼 색상 (예: 금색) */
+#score-page-button {
+    background-color: #f1c40f;
+    color: #2c3e50;
+}
+#score-page-button:hover {
+    background-color: #f39c12;
+}
+
+/* [★수정★] 버튼 컨테이너: 세로로 쌓고, *우측 정렬*로 복구 */
+.team-controls { 
+    display: flex;
+    flex-direction: column; /* 1, 2번째 줄을 세로로 쌓음 */
+    gap: 10px; /* 1, 2번째 줄 사이의 간격 */
+    flex-shrink: 0;
+    align-items: flex-end; /* [★수정★] 버튼 줄들을 다시 우측 정렬 */
+}
+
+/* [★추가★] 각 버튼 줄의 스타일 (내부 버튼들을 가로 정렬) */
+.button-row {
+    display: flex;
+    gap: 10px; /* 버튼 사이의 간격 */
+    flex-wrap: wrap; /* (혹시 모르니) 줄바꿈 허용 */
+}
+
+/* .button-row 스타일은 그대로 둡니다. */
+.button-row {
+    display: flex;
+    gap: 10px; /* 버튼 사이의 간격 */
+    flex-wrap: wrap; 
+}
+
+/* [★추가★] 버튼들의 크기를 통일 (가장 긴 버튼 기준) */
+.button-row > button,
+.button-row > .button-link {
+    min-width: 140px; /* 모든 버튼의 최소 너비를 140px로 설정 (조절 가능) */
+    text-align: center; /* 텍스트 중앙 정렬 */
+    box-sizing: border-box; /* 패딩을 포함하여 너비 계산 */
+}
