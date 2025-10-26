@@ -10,7 +10,7 @@ const defaultPlayers = [
     { name: '두뭉', cost: 1, tier: 'F' }, { name: '푸린', cost: 1, tier: 'F' }, { name: '치카', cost: 1, tier: 'F' }, { name: '냐미', cost: 1, tier: 'F' }, { name: '샘웨', cost: 1, tier: 'F' }, { name: '나리땽', cost: 1, tier: 'F' } ,{ name: '꽃핀', cost:1, tier:'F'}
 ];
 
-//  한 줄로 된 배열을 여러 줄로 변경
+// [★가독성 수정★] 한 줄로 된 배열을 여러 줄로 변경
 const defaultTeams = [ 
     { id: 1, name: 'Team 1', members: [], cost: 0 }, 
     { id: 2, name: 'Team 2', members: [], cost: 0 }, 
@@ -20,8 +20,7 @@ const defaultTeams = [
     { id: 6, name: 'Team 6', members: [], cost: 0 } 
 ];
 
-// 데이터 버전 관리
-// 나중에 defaultPlayers를 또 수정하면 이 숫자를 3으로 바꾸면 됩니다.
+// [★수정★] 데이터 버전 관리
 const CURRENT_DATA_VERSION = 2; 
 
 let players;
@@ -35,84 +34,53 @@ function saveData() {
         localStorage.setItem('savedPlayers', JSON.stringify(players)); 
         localStorage.setItem('savedTeams', JSON.stringify(allTeams)); 
         localStorage.setItem('savedAttendees', JSON.stringify(Array.from(attendingPlayers))); 
-        
-        //  데이터를 저장할 때, 현재 버전도 함께 저장합니다.
         localStorage.setItem('savedDataVersion', CURRENT_DATA_VERSION);
     } catch (e) { console.error("Error saving data:", e); } 
 }
 
 function loadData() {
-    let needsDefault = false; // 기본값을 강제로 로드해야 하는지 확인하는 플래그
-
+    let needsDefault = false;
     try {
-        // 저장된 데이터 버전을 확인합니다.
         const savedVersion = parseInt(localStorage.getItem('savedDataVersion'));
-
-        // 저장된 버전이 현재 코드의 버전과 다르면, 강제로 초기화합니다.
         if (savedVersion !== CURRENT_DATA_VERSION) {
             console.warn(`구 버전(v${savedVersion}) 데이터를 감지하여 v${CURRENT_DATA_VERSION}으로 초기화합니다.`);
-            localStorage.clear(); // <-- 모든 로컬 스토리지를 삭제
-            needsDefault = true; // 기본값 플래그 ON
+            localStorage.clear();
+            needsDefault = true;
         }
     } catch (e) {
         console.error("버전 확인 중 오류 발생. 기본값으로 강제 초기화합니다.", e);
-        needsDefault = true; // 무언가 잘못되면 일단 초기화
+        needsDefault = true;
     }
-
-    // --- 선수 목록 로드 ---
     try {
         const savedPlayers = localStorage.getItem('savedPlayers');
-        // 'needsDefault'가 true이거나, 저장된 값이 없으면 defaultPlayers를 사용합니다.
         players = (savedPlayers && !needsDefault) ? JSON.parse(savedPlayers) : JSON.parse(JSON.stringify(defaultPlayers));
     } catch (e) { console.error("P Load Error", e); players = JSON.parse(JSON.stringify(defaultPlayers)); }
-    
-    // --- 팀 목록 로드 ---
     try {
         const savedTeams = localStorage.getItem('savedTeams');
         allTeams = (savedTeams && !needsDefault) ? JSON.parse(savedTeams) : JSON.parse(JSON.stringify(defaultTeams));
     } catch (e) { console.error("T Load Error", e); allTeams = JSON.parse(JSON.stringify(defaultTeams)); }
-    
-    // --- 참석자 목록 로드 ---
     try {
         const savedAttendees = localStorage.getItem('savedAttendees');
         attendingPlayers = (savedAttendees && !needsDefault) ? new Set(JSON.parse(savedAttendees)) : new Set();
     } catch (e) { console.error("A Load Error", e); attendingPlayers = new Set(); }
-    
     activeTeamId = allTeams.length > 0 ? allTeams[0].id : null;
 }
 
-
-// switch 문 줄바꿈
 function getCostFromTier(tier) { 
     switch (tier) { 
-        case 'SSS': return 8; 
-        case 'SS': return 7; 
-        case 'S': return 6; 
-        case 'A': return 5; 
-        case 'B': return 4; 
-        case 'C': return 3; 
-        case 'D': return 2; 
-        case 'F': return 1; 
-        default: return 0; 
+        case 'SSS': return 8; case 'SS': return 7; case 'S': return 6; 
+        case 'A': return 5; case 'B': return 4; case 'C': return 3; 
+        case 'D': return 2; case 'F': return 1; default: return 0; 
     } 
 }
-
-//  switch 문 줄바꿈
 function getTierFromCost(cost) { 
     cost = parseInt(cost); 
     switch (cost) { 
-        case 8: return 'SSS'; 
-        case 7: return 'SS'; 
-        case 6: return 'S'; 
-        case 5: return 'A';   
-        case 4: return 'B';  
-        case 3: return 'C'; 
-        case 2: return 'D';   
-        case 1: return 'F';  
-        default: return 'N/A'; 
+        case 8: return 'SSS'; case 7: return 'SS'; case 6: return 'S'; 
+        case 5: return 'A';   case 4: return 'B';  case 3: return 'C'; 
+        case 2: return 'D';   case 1: return 'F';  default: return 'N/A'; 
     } 
 }
-
 function updateTeamCostForPlayer(playerName, newCost, oldCost) { 
     allTeams.forEach(team => { 
         const member = team.members.find(m => m.name === playerName); 
@@ -124,31 +92,56 @@ function updateTeamCostForPlayer(playerName, newCost, oldCost) {
     }); 
 }
 
+// [★수정★] 배열을 무작위로 섞는 함수 (이전과 동일)
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+}
+
+
 document.addEventListener('DOMContentLoaded', () => {
 
-    // 스플래시 스크린 로직
+    // [★☆★ 로직 대규모 수정 ★☆★] 스플래시 스크린 (SessionStorage 활용)
     const splashScreen = document.getElementById('splash-screen');
-    const mainContainer = document.querySelector('.main-container'); // ID가 아닌 클래스로 찾기
-    
-    // 2초(2000ms) 후에 스플래시 숨기고 메인 컨텐츠 표시
-    setTimeout(() => {
+    const mainContainer = document.querySelector('.main-container'); 
+
+    // 1. '이번 세션'에 스플래시를 본 적이 있는지 확인합니다.
+    const hasBeenShown = sessionStorage.getItem('hasSplashBeenShown');
+
+    if (hasBeenShown === 'true') {
+        // 2. 본 적이 있다면 (예: score.html에서 돌아옴):
+        //    즉시 스플래시를 숨기고 메인 컨텐츠를 보여줍니다.
         if (splashScreen) {
-            splashScreen.style.opacity = '0'; // 부드럽게 사라지기 (CSS transition과 연동)
-            
-            // 0.5초(CSS transition 시간) 후에 display를 none으로 변경
-            setTimeout(() => {
-                splashScreen.style.display = 'none';
-            }, 500); 
+            splashScreen.style.display = 'none'; 
         }
         if (mainContainer) {
-            // CSS에서 none으로 바꾼 것을 flex로 다시 설정
-            mainContainer.style.display = 'flex'; 
+            mainContainer.style.display = 'flex';
         }
-    }, 2000); // 2초간 로고 표시 (이 숫자를 3000으로 바꾸면 3초)
+    } else {
+        // 3. 본 적이 없다면 (예: 처음 사이트 방문):
+        //    원래대로 2초간 스플래시를 보여줍니다.
+        setTimeout(() => {
+            if (splashScreen) {
+                splashScreen.style.opacity = '0';
+                setTimeout(() => {
+                    splashScreen.style.display = 'none';
+                }, 500); // 0.5초(사라지는 시간) 뒤에 완전히 제거
+            }
+            if (mainContainer) {
+                mainContainer.style.display = 'flex'; 
+            }
+            
+            // 4. 스플래시가 끝났으므로, "이제 봤음"이라고 sessionStorage에 기록합니다.
+            sessionStorage.setItem('hasSplashBeenShown', 'true');
+            
+        }, 2000); // 2초간 로고 표시
+    }
+    // --- 스플래시 로직 끝 ---
 
 
-    // --- 기존 코드 (이하 동일) ---
-    // ID로 DOM 요소 가져오기
+    // --- ID로 DOM 요소 가져오기 ---
     const playerListDiv = document.getElementById('player-list');
     const allTeamsContainer = document.getElementById('all-teams-container');
     const addTeamButton = document.getElementById('add-team-button');
@@ -189,75 +182,103 @@ document.addEventListener('DOMContentLoaded', () => {
         } 
     });
 
-    //  선수 추가 (및 자동 출석)
+    // 선수 추가 (및 자동 출석)
     addPlayerButton.addEventListener('click', () => {
         const name = newPlayerNameInput.value.trim();
         const cost = parseInt(newPlayerCostSelect.value);
         const tier = getTierFromCost(cost);
-        
-        if (name === "") {
-            alert('선수 이름을 입력하세요.');
-            return;
-        }
-        if (players.some(p => p.name === name)) {
-            alert('이미 존재하는 선수 이름입니다.');
-            return;
-        }
-        
+        if (name === "") { alert('선수 이름을 입력하세요.'); return; }
+        if (players.some(p => p.name === name)) { alert('이미 존재하는 선수 이름입니다.'); return; }
         const newPlayer = { name, cost, tier };
         players.push(newPlayer);
-        
-        //  선수를 추가함과 동시에 '참석'으로 등록
-        attendingPlayers.add(name);
-
+        attendingPlayers.add(name); // 자동 출석
         players.sort((a, b) => a.name.localeCompare(b.name));
         saveData();
         renderAll();
         newPlayerNameInput.value = '';
     });
 
-    // 자동 배정
+    // [★☆★ 밸런스 + 랜덤 배정 ★☆★]
     autoAssignButton.addEventListener('click', () => { 
         if (!confirm('현재 팀 구성을 유지한 채, 참석자 중 팀 없는 선수들을 빈 자리에 자동으로 배정하시겠습니까?')) { 
             return; 
         } 
+        
+        // 1. 이미 배정된 선수들 파악
         const assignedPlayerNames = new Set(); 
         allTeams.forEach(team => { 
             team.members.forEach(member => assignedPlayerNames.add(member.name)); 
         }); 
         
+        // 2. 배정할 선수 목록 (참석 O, 배정 X)
         let unassignedAttendees = players
-            .filter(p => attendingPlayers.has(p.name) && !assignedPlayerNames.has(p.name))
-            .sort((a, b) => b.cost - a.cost); 
+            .filter(p => attendingPlayers.has(p.name) && !assignedPlayerNames.has(p.name));
             
-        let assignedCount = 0; 
-        const totalTeams = allTeams.length; 
+        let assignedCount = 0;
+        let playersLeftToAssign = unassignedAttendees.length;
+
+        // 3. [★밸런스★] 선수들을 코스트(티어)별로 "버킷(bucket)"에 그룹핑
+        const buckets = {};
+        unassignedAttendees.forEach(player => {
+            if (!buckets[player.cost]) {
+                buckets[player.cost] = [];
+            }
+            buckets[player.cost].push(player);
+        });
         
-        if (totalTeams === 0) { 
-            alert('자동 배정할 팀이 없습니다. 먼저 팀을 추가해주세요.'); 
-            return; 
-        } 
-        
-        unassignedAttendees.forEach(player => { 
-            let bestTeam = null; 
-            let minCost = Infinity; 
-            allTeams.forEach(team => { 
-                if (team.members.length < MAX_MEMBERS_PER_TEAM) { 
-                    if (team.cost < minCost) { 
-                        minCost = team.cost; 
-                        bestTeam = team; 
-                    } 
-                } 
-            }); 
+        // 4. [★밸런스★] 코스트가 높은 순서대로 버킷을 정렬
+        const sortedCosts = Object.keys(buckets).map(Number).sort((a, b) => b - a); // [8, 7, 6, 5...]
+
+        // 5. 버킷에서 가장 코스트가 높은 선수를 1명 꺼내는 함수
+        function getNextAvailablePlayer() {
+            for (const cost of sortedCosts) {
+                if (buckets[cost] && buckets[cost].length > 0) {
+                    // [★랜덤요소-1★] 같은 티어(코스트) 내에서는 선수를 랜덤으로 뽑음
+                    const bucket = buckets[cost];
+                    const randomIndex = Math.floor(Math.random() * bucket.length);
+                    const player = bucket.splice(randomIndex, 1)[0]; // 뽑은 선수는 버킷에서 제거
+                    return player;
+                }
+            }
+            return null; // 남은 선수가 없음
+        }
+
+        // 6. 모든 팀이 꽉 찰 때까지 (혹은 선수가 다 떨어질 때까지) 라운드 진행
+        let round = 0;
+        while (playersLeftToAssign > 0 && round < MAX_MEMBERS_PER_TEAM) {
             
-            if (bestTeam) { 
-                bestTeam.members.push({ name: player.name, cost: player.cost }); 
-                bestTeam.cost += player.cost; 
-                assignedCount++; 
-            } 
-        }); 
+            // 7. 이번 라운드에 선수를 받을 수 있는 팀 목록 (예: 0명인 팀, 1명인 팀...)
+            let availableTeamsThisRound = allTeams.filter(team => team.members.length === round);
+            
+            if (availableTeamsThisRound.length === 0) {
+                 break; 
+            }
+
+            // 8. [★랜덤요소-2★] 이번 라운드에 선수를 받을 팀들의 "순서"를 무작위로 섞음
+            shuffleArray(availableTeamsThisRound);
+            
+            // 9. 섞인 팀 순서대로, "가장 코스트가 높은 선수"를 배정
+            for (const team of availableTeamsThisRound) {
+                const playerToAssign = getNextAvailablePlayer(); // 밸런스 (최고 코스트)
+                
+                if (playerToAssign) {
+                    team.members.push({ name: playerToAssign.name, cost: playerToAssign.cost });
+                    team.cost += playerToAssign.cost;
+                    assignedCount++;
+                    playersLeftToAssign--;
+                } else {
+                    break; // 배정할 선수가 더 이상 없음
+                }
+            }
+            
+            if (playersLeftToAssign === 0) {
+                break; // 모든 선수가 배정됨
+            }
+            
+            round++; // 다음 라운드 진행 (0명인 팀 -> 1명인 팀 -> 2명인 팀)
+        }
         
-        console.log(`총 ${assignedCount}명의 선수가 자동으로 배정되었습니다.`); 
+        console.log(`총 ${assignedCount}명의 선수가 자동으로 배정되었습니다.`);
         saveData(); 
         renderAll(); 
     });
@@ -265,10 +286,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 이미지 저장
     saveImageButton.addEventListener('click', () => { 
         const targetElement = document.getElementById('all-teams-container'); 
-        if (!targetElement) { 
-            alert('이미지를 저장할 팀 현황 영역을 찾을 수 없습니다.'); 
-            return; 
-        } 
+        if (!targetElement) { alert('이미지를 저장할 팀 현황 영역을 찾을 수 없습니다.'); return; } 
         const options = { backgroundColor: '#1e1e1e', useCORS: true }; 
         html2canvas(targetElement, options).then(canvas => { 
             const imageURL = canvas.toDataURL('image/png'); 
@@ -278,10 +296,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.appendChild(downloadLink); 
             downloadLink.click(); 
             document.body.removeChild(downloadLink); 
-        }).catch(error => { 
-            console.error('이미지 저장 중 오류 발생:', error); 
-            alert('이미지 저장에 실패했습니다. 콘솔을 확인해주세요.'); 
-        }); 
+        }).catch(error => { console.error('이미지 저장 중 오류 발생:', error); alert('이미지 저장에 실패했습니다. 콘솔을 확인해주세요.'); }); 
     });
 
     // 텍스트 복사
@@ -289,26 +304,15 @@ document.addEventListener('DOMContentLoaded', () => {
         let teamsText = ''; 
         allTeams.forEach(team => { 
             teamsText += `${team.name} (총: ${team.cost}) [${team.members.length}/${MAX_MEMBERS_PER_TEAM}명]:\n`; 
-            if (team.members.length > 0) { 
-                teamsText += team.members.map(m => `  - ${m.name} (${m.cost})`).join('\n'); 
-            } else { 
-                teamsText += '  (선수 없음)'; 
-            } 
+            if (team.members.length > 0) { teamsText += team.members.map(m => `  - ${m.name} (${m.cost})`).join('\n'); } else { teamsText += '  (선수 없음)'; } 
             teamsText += '\n\n'; 
         }); 
-        
         navigator.clipboard.writeText(teamsText.trim()).then(() => { 
             const originalText = copyTeamsButton.textContent; 
             copyTeamsButton.textContent = '✅ 복사 완료!'; 
             copyTeamsButton.classList.add('copied'); 
-            setTimeout(() => { 
-                copyTeamsButton.textContent = originalText; 
-                copyTeamsButton.classList.remove('copied'); 
-            }, 1500); 
-        }).catch(err => { 
-            console.error('클립보드 복사 실패:', err); 
-            alert('텍스트 복사에 실패했습니다.'); 
-        }); 
+            setTimeout(() => { copyTeamsButton.textContent = originalText; copyTeamsButton.classList.remove('copied'); }, 1500); 
+        }).catch(err => { console.error('클립보드 복사 실패:', err); alert('텍스트 복사에 실패했습니다.'); }); 
     });
 
     // 선수 목록 클릭 (팀에 선수 추가)
@@ -316,35 +320,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const playerButton = event.target.closest('.player-button'); 
         if (playerButton) { 
             const playerName = playerButton.dataset.name; 
-            
-            if (!attendingPlayers.has(playerName)) { 
-                alert('참석자로 선택된 선수만 팀에 배정할 수 있습니다.'); 
-                return; 
-            } 
-            if (!activeTeamId) { 
-                alert('먼저 선수를 추가할 팀을 선택해주세요.'); 
-                return; 
-            } 
-            
+            if (!attendingPlayers.has(playerName)) { alert('참석자로 선택된 선수만 팀에 배정할 수 있습니다.'); return; } 
+            if (!activeTeamId) { alert('먼저 선수를 추가할 팀을 선택해주세요.'); return; } 
             const cost = parseInt(playerButton.dataset.cost); 
             const activeTeam = allTeams.find(team => team.id === activeTeamId); 
-            
             if (!activeTeam) return; 
-            
-            if (activeTeam.members.length >= MAX_MEMBERS_PER_TEAM) { 
-                alert(`팀 인원은 최대 ${MAX_MEMBERS_PER_TEAM}명까지 가능합니다.`); 
-                return; 
-            } 
-            
-            const isPlayerTaken = allTeams.some(team => 
-                team.members.some(member => member.name === playerName) 
-            ); 
-            
-            if (isPlayerTaken) { 
-                alert('이미 다른 팀에 소속된 선수입니다.'); 
-                return; 
-            } 
-            
+            if (activeTeam.members.length >= MAX_MEMBERS_PER_TEAM) { alert(`팀 인원은 최대 ${MAX_MEMBERS_PER_TEAM}명까지 가능합니다.`); return; } 
+            const isPlayerTaken = allTeams.some(team => team.members.some(member => member.name === playerName) ); 
+            if (isPlayerTaken) { alert('이미 다른 팀에 소속된 선수입니다.'); return; } 
             activeTeam.members.push({ name: playerName, cost: cost }); 
             activeTeam.cost += cost; 
             saveData(); 
@@ -353,7 +336,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // 팀 컨테이너 클릭 (팀 활성화, 선수 제거, 팀 제거 등)
-    // [★수정★] '팀 비우기'시 activeId 유지, '팀 삭제'시 이름 재정렬
     allTeamsContainer.addEventListener('click', (event) => { 
         // 1. 팀에서 선수 제거
         const clickedMember = event.target.closest('.team-member'); 
@@ -362,10 +344,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const teamId = parseInt(teamBox.dataset.teamId); 
             const team = allTeams.find(t => t.id === teamId); 
             if (!team) return; 
-            
             const memberName = clickedMember.textContent.split(' (')[0]; 
             const memberToRemove = team.members.find(m => m.name === memberName); 
-            
             if (memberToRemove) { 
                 team.cost -= memberToRemove.cost; 
                 team.members = team.members.filter(m => m.name !== memberName); 
@@ -375,40 +355,31 @@ document.addEventListener('DOMContentLoaded', () => {
             return; 
         } 
         
-        // 2. 팀 비우기 [activeTeamId 변경 로직 삭제]
+        // 2. 팀 비우기
         const clearButton = event.target.closest('.clear-team-button'); 
         if (clearButton) { 
             const teamBox = event.target.closest('.team-box'); 
             const teamId = parseInt(teamBox.dataset.teamId); 
-            
             const teamToClear = allTeams.find(t => t.id === teamId); 
             teamToClear.members = []; 
             teamToClear.cost = 0; 
-            
             saveData(); 
             renderAll(); 
             return; 
         } 
         
-        // 3. 팀 삭제 [수정: 팀 이름(Team 1, 2...) 재정렬 기능 추가]
+        // 3. 팀 삭제 (이름 재정렬 포함)
         const removeButton = event.target.closest('.remove-team-button'); 
         if (removeButton) { 
             const teamBox = event.target.closest('.team-box'); 
             const teamId = parseInt(teamBox.dataset.teamId); 
-            
-            // 1. 해당 팀을 배열에서 삭제
             allTeams = allTeams.filter(t => t.id !== teamId); 
-            
-            // [★추가★] 2. 남아있는 모든 팀의 이름을 'Team 1', 'Team 2' ... 순으로 다시 매김
             allTeams.forEach((team, index) => {
                 team.name = `Team ${index + 1}`;
             });
-            
-            // 3. 만약 삭제한 팀이 활성화된 팀이었다면, 첫 번째 팀을 활성화
             if (activeTeamId === teamId) { 
                 activeTeamId = allTeams.length > 0 ? allTeams[0].id : null; 
             } 
-            
             saveData(); 
             renderAll(); 
             return; 
@@ -427,13 +398,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function setupDropZones() { 
         const dropGroups = document.querySelectorAll('.player-button-group'); 
         dropGroups.forEach(group => { 
-            group.addEventListener('dragover', (event) => { 
-                event.preventDefault(); 
-                group.classList.add('drag-over'); 
-            }); 
-            group.addEventListener('dragleave', () => { 
-                group.classList.remove('drag-over'); 
-            }); 
+            group.addEventListener('dragover', (event) => { event.preventDefault(); group.classList.add('drag-over'); }); 
+            group.addEventListener('dragleave', () => { group.classList.remove('drag-over'); }); 
             group.addEventListener('drop', (event) => { 
                 event.preventDefault(); 
                 group.classList.remove('drag-over'); 
@@ -441,7 +407,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const newCost = parseInt(group.dataset.cost); 
                 const newTier = group.dataset.tier; 
                 const player = players.find(p => p.name === playerName); 
-                
                 if (player && player.tier !== newTier) { 
                     const oldCost = player.cost; 
                     player.cost = newCost; 
@@ -468,15 +433,8 @@ document.addEventListener('DOMContentLoaded', () => {
             teamBox.className = 'team-box'; 
             teamBox.dataset.teamId = team.id; 
             teamBox.dataset.teamName = team.name; 
-            if (team.id === activeTeamId) { 
-                teamBox.classList.add('active'); 
-            } 
-            
-            const membersHTML = team.members.map(member => 
-                `<span class="team-member" title="클릭하여 ${member.name} 선수 제외">${member.name} (${member.cost || 'N/A'})</span>`
-            ).join(''); 
-            
-            // innerHTML을 여러 줄로 된 template literal(백틱)로 변경
+            if (team.id === activeTeamId) { teamBox.classList.add('active'); } 
+            const membersHTML = team.members.map(member => `<span class="team-member" title="클릭하여 ${member.name} 선수 제외">${member.name} (${member.cost || 'N/A'})</span>`).join(''); 
             teamBox.innerHTML = `
                 <h3>${team.name} (총: ${team.cost}) [${team.members.length}/${MAX_MEMBERS_PER_TEAM}]</h3> 
                 <div class="team-member-list">${membersHTML}</div> 
@@ -485,7 +443,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     <button class="remove-team-button">팀 삭제</button> 
                 </div>
             `;
-            
             allTeamsContainer.appendChild(teamBox); 
         }); 
     }
@@ -506,11 +463,7 @@ document.addEventListener('DOMContentLoaded', () => {
         sortedPlayers.forEach(player => { 
             const playerItem = document.createElement('div');
             playerItem.className = 'player-item';
-            if (attendingPlayers.has(player.name)) { 
-                playerItem.classList.add('attending'); 
-            }
-
-            // 체크박스 생성
+            if (attendingPlayers.has(player.name)) { playerItem.classList.add('attending'); }
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox'; 
             checkbox.className = 'attend-checkbox';
@@ -518,51 +471,27 @@ document.addEventListener('DOMContentLoaded', () => {
             checkbox.dataset.playerName = player.name; 
             checkbox.addEventListener('change', (event) => { 
                 const name = event.target.dataset.playerName; 
-                if (event.target.checked) { 
-                    attendingPlayers.add(name); 
-                } else { 
-                    attendingPlayers.delete(name); 
-                } 
+                if (event.target.checked) { attendingPlayers.add(name); } else { attendingPlayers.delete(name); } 
                 saveData(); 
                 renderAll(); 
             });
-
-            // 선수 버튼 생성
             const button = document.createElement('button');
             button.className = `player-button tier-${player.tier}`;
             button.appendChild(document.createTextNode(`${player.name} (${player.cost})`)); 
             button.dataset.name = player.name; 
             button.dataset.cost = player.cost; 
             button.draggable = true; 
-            
-            button.addEventListener('dragstart', (event) => { 
-                event.target.classList.add('dragging'); 
-                event.dataTransfer.setData('text/plain', player.name); 
-            });
-            button.addEventListener('dragend', (event) => { 
-                event.target.classList.remove('dragging'); 
-            });
-
-            // 선수 삭제 버튼 생성
+            button.addEventListener('dragstart', (event) => { event.target.classList.add('dragging'); event.dataTransfer.setData('text/plain', player.name); });
+            button.addEventListener('dragend', (event) => { event.target.classList.remove('dragging'); });
             const deleteBtn = document.createElement('span');
             deleteBtn.className = 'delete-player-btn'; 
             deleteBtn.textContent = '×';
             deleteBtn.title = `${player.name} 선수 목록에서 삭제`;
-            
             deleteBtn.addEventListener('click', (event) => { 
                 event.stopPropagation(); 
                 const playerName = player.name; 
-                const isPlayerTaken = allTeams.some(team => 
-                    team.members.some(member => member.name === playerName) 
-                ); 
-                
-                // if문 줄바꿈
-                if (isPlayerTaken) { 
-                    alert('팀에 소속된 선수는 삭제할 수 없습니다.\n팀에서 먼저 제외한 후 시도해주세요.'); 
-                    return; 
-                } 
-                
-                // if문 줄바꿈
+                const isPlayerTaken = allTeams.some(team => team.members.some(member => member.name === playerName) ); 
+                if (isPlayerTaken) { alert('팀에 소속된 선수는 삭제할 수 없습니다.\n팀에서 먼저 제외한 후 시도해주세요.'); return; } 
                 if (confirm(`'${playerName}' 선수를 목록에서 영구히 삭제하시겠습니까?`)) { 
                     players = players.filter(p => p.name !== playerName); 
                     attendingPlayers.delete(playerName); 
@@ -571,12 +500,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 } 
             });
             button.appendChild(deleteBtn); 
-            
-            // playerItem에 체크박스와 버튼 추가
             playerItem.appendChild(checkbox);
             playerItem.appendChild(button);
-
-            //  티어 이름에 맞게 ID 매핑
             let targetDivId;
             switch (player.tier) {
                 case 'SSS': targetDivId = 'list-SSS'; break; 
@@ -589,54 +514,33 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'F':   targetDivId = 'list-F';   break;
                 default:    targetDivId = null;
             }
-            if (targetDivId) { 
-                document.getElementById(targetDivId).appendChild(playerItem); 
-            }
+            if (targetDivId) { document.getElementById(targetDivId).appendChild(playerItem); }
         });
-        
         updatePlayerButtonStates();
     }
 
     // 선수 버튼 상태 (활성화/비활성화) 업데이트
     function updatePlayerButtonStates() {
         const takenPlayers = new Set();
-        allTeams.forEach(team => { 
-            team.members.forEach(member => takenPlayers.add(member.name)); 
-        });
+        allTeams.forEach(team => { team.members.forEach(member => takenPlayers.add(member.name)); });
         const activeTeam = allTeams.find(team => team.id === activeTeamId);
-
         document.querySelectorAll('.player-item').forEach(item => {
             const button = item.querySelector('.player-button');
             const checkbox = item.querySelector('.attend-checkbox');
             const name = button.dataset.name; 
             const activeTeamIsFull = activeTeam && activeTeam.members.length >= MAX_MEMBERS_PER_TEAM;
-
-            //  if문 줄바꿈
-            if (checkbox.checked) { 
-                item.classList.add('attending'); 
-            } else { 
-                item.classList.remove('attending'); 
-            }
-
-            //  if/else if/else 체인 줄바꿈
+            if (checkbox.checked) { item.classList.add('attending'); } else { item.classList.remove('attending'); }
             if (takenPlayers.has(name)) { 
-                button.classList.add('selected'); 
-                button.classList.remove('disabled'); 
-                button.disabled = true;
+                button.classList.add('selected'); button.classList.remove('disabled'); button.disabled = true;
                 checkbox.disabled = true; 
             } else if (!checkbox.checked) { 
-                button.classList.add('disabled'); 
-                button.classList.remove('selected'); 
-                button.disabled = true;
+                button.classList.add('disabled'); button.classList.remove('selected'); button.disabled = true;
                 checkbox.disabled = false;
             } else if (!activeTeam || activeTeamIsFull) { 
-                button.classList.add('disabled'); 
-                button.classList.remove('selected'); 
-                button.disabled = true;
+                button.classList.add('disabled'); button.classList.remove('selected'); button.disabled = true;
                 checkbox.disabled = false; 
             } else { 
-                button.classList.remove('selected', 'disabled'); 
-                button.disabled = false;
+                button.classList.remove('selected', 'disabled'); button.disabled = false;
                 checkbox.disabled = false;
             }
         });
