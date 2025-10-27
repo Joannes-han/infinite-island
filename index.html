@@ -7,38 +7,38 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
-    <body>
-    <div id="splash-screen">
+<body> <div id="splash-screen">
         <img src="무한섬_로고.png" alt="무한섬 팀 배정 페이지 로고" class="header-logo">
     </div>
 
-    <div class="main-container">
-
-    
-    <div class="main-container">
-        <div id="left-column" class="column">
+    <div class="main-container"> <div id="left-column" class="column">
             <div class="column-header">
                 <h2>팀 현황</h2>
                 <div class="team-controls">
-                <div class="button-row">
-                    <a href="score.html" class="button-link" id="score-page-button">🏆 점수 계산</a>
-                    <button id="copy-teams-button">📋 텍스트 복사</button>
-                    <button id="save-image-button">🖼️ 이미지 저장</button> 
+                    <div class="button-row">
+                        <a href="score.html" class="button-link" id="score-page-button">🏆 점수 계산</a>
+                        <button id="copy-teams-button">📋 텍스트 복사</button>
+                        <button id="save-image-button">🖼️ 이미지 저장</button>
+                    </div>
+                    <div class="button-row">
+                        <button id="auto-assign-button">🎲 자동 배정</button>
+                        <button id="add-team-button">➕ 새 팀 추가</button>
+                        <button id="reset-all-button">🚨 모든 팀 초기화</button>
+                    </div>
                 </div>
-                <div class="button-row">
-                    <button id="auto-assign-button">🎲 자동 배정</button> 
-                    <button id="add-team-button">➕ 새 팀 추가</button>
-                    <button id="reset-all-button">🚨 모든 팀 초기화</button>
-                </div>
-          </div>
             </div>
             <div id="all-teams-container">
                 </div>
         </div>
 
         <div id="right-column" class="column">
-            <h2>선수 목록 (<span id="attendee-count">0</span>명 참석)</h2>
+            <div class="right-column-header">
+                <h2>선수 목록 (<span id="attendee-count">0</span>명 참석)</h2>
+                <div class="header-button-group">
+                     <a href="attend.html" class="button-link" id="attend-page-button">✔️ 출석 관리</a>
+                     <a href="tier.html" class="button-link" id="tier-page-button">⚙️ 티어 관리</a>
+                </div>
+            </div>
             <div class="add-player-form">
                 <input type="text" id="new-player-name" placeholder="선수 이름">
                 <select id="new-player-cost">
@@ -53,7 +53,7 @@
                 </select>
                 <button id="add-player-button">선수 추가</button>
             </div>
-            <div id="player-list"> 
+            <div id="player-list">
                 <div class="tier-group"><h3>SSS (8 코스트)</h3><div id="list-SSS" class="player-button-group" data-cost="8" data-tier="SSS"></div></div>
                 <div class="tier-group"><h3>SS (7 코스트)</h3><div id="list-SS" class="player-button-group" data-cost="7" data-tier="SS"></div></div>
                 <div class="tier-group"><h3>S (6 코스트)</h3><div id="list-S" class="player-button-group" data-cost="6" data-tier="S"></div></div>
@@ -64,8 +64,7 @@
                 <div class="tier-group"><h3>F (1 코스트)</h3><div id="list-F" class="player-button-group" data-cost="1" data-tier="F"></div></div>
             </div>
         </div>
-    </div> 
 
-    <script src="script.js"></script> 
+    </div> <script src="script.js"></script>
 </body>
 </html>
