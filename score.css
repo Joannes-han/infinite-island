@@ -48,55 +48,68 @@ h1 {
     background-color: #7f8c8d;
 }
 
-/* [★추가★] 버튼 래퍼 (Flexbox) */
+/*  버튼 래퍼 (모든 버튼을 우측 정렬) */
 .button-wrapper {
     display: flex;
-    justify-content: space-between; /* 양쪽 끝으로 버튼을 보냄 */
+    justify-content: flex-end; /* 모든 버튼을 우측 끝으로 보냄 */
     align-items: center;
-    margin: 15px 0 20px 0; /* 위 15px, 아래 20px 마진 */
+    gap: 10px; /* 버튼 사이 간격 */
+    margin: 15px 0 20px 0; 
 }
 
-/* [★수정★] 계산 버튼은 왼쪽 (남는 공간 차지) */
+/*  계산 버튼 (크기 통일) */
 #calculate-score-button {
     background-color: #2ecc71;
     color: white;
     border: none;
-    padding: 10px 15px; /* 원래 크기 유지 */
-    font-size: 1.1em;   /* 원래 크기 유지 */
+    padding: 8px 12px; 
+    font-size: 0.9em;  
+    min-width: 140px;  
+    text-align: center;
     border-radius: 5px;
     cursor: pointer;
     font-weight: bold;
-    
-    flex-grow: 1; /* 남는 공간을 모두 차지 */
-    margin-right: 10px; /* 오른쪽 버튼과의 간격 */
 }
 #calculate-score-button:hover {
     background-color: #27ae60;
 }
 
-/* [★수정★] 이미지 저장 버튼은 작게, 오른쪽 */
+/*  이미지 저장 버튼 (크기 통일) */
 #save-score-image-button {
     background-color: #9b59b6; /* 보라색 */
     color: white;
     border: none;
-    
-    /* '팀 추가' 버튼과 유사한 크기 */
-    padding: 8px 12px;
-    font-size: 0.9em;
-    
+    padding: 8px 12px; 
+    font-size: 0.9em;  
+    min-width: 140px;  
+    text-align: center;
     border-radius: 5px;
     cursor: pointer;
     font-weight: bold;
-    
-    flex-grow: 0; /* 크기 고정 */
-    flex-shrink: 0; /* 줄어들지 않음 */
 }
 #save-score-image-button:hover {
     background-color: #8e44ad;
 }
 
+/*  점수 초기화 버튼 (크기 통일) */
+#reset-scores-button {
+    background-color: #e74c3c; /* 빨간색 */
+    color: white;
+    border: none;
+    padding: 8px 12px; 
+    font-size: 0.9em;  
+    min-width: 140px;  
+    text-align: center;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+#reset-scores-button:hover {
+    background-color: #c0392b;
+}
 
-/* --- [★수정★] 점수 설정 상자 --- */
+
+/* --- 점수 설정 상자 --- */
 .rules-box {
     background-color: #222;
     border: 1px solid #444;
@@ -150,7 +163,7 @@ h1 {
 }
 
 
-/* --- [★수정★] 점수 테이블 --- */
+/* --- 점수 테이블 --- */
 #score-table {
     width: 100%;
     border-collapse: collapse;
@@ -180,7 +193,7 @@ h1 {
     color: #ccc;
 }
 
-/* [★수정★] 라운드 점수 입력창 */
+/* 라운드 점수 입력창 */
 .round-score-input {
     width: 60px;
     background-color: #3a3a3a;
@@ -207,4 +220,11 @@ h1 {
 }
 .checkpoint-result.fail {
     color: #e74c3c; /* 실패 (X) */
+}
+
+/* ---  숫자 입력창 스피너(화살표) 숨기기 --- */
+input[type="number"] ut[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none; /* Chrome, Safari, Edge */
+    margin: 0;
 }
