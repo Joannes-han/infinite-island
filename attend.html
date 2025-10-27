@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>출석 관리 (2열 분리)</title>
+    <link rel="stylesheet" href="attend.css">
+</head>
+<body>
+    <div class="attend-container">
+        <h1>출석 관리</h1>
+
+        <div class="button-wrapper">
+            <a href="index.html" class="button-link" id="back-button">⬅️ 팀 배정으로 돌아가기</a>
+        </div>
+
+        <div class="view-controls">
+            <button id="view-tier-button">티어별 보기</button>
+            <button id="view-all-button" class="active">모든 선수 보기</button>
+        </div>
+
+        <div class="info-box">
+            <p>선수 이름을 클릭하여 상태를 변경하세요. (✔️ 출근: 팀 배정 페이지에 표시됨)</p>
+            <p>총 선수: <span id="total-count">0</span>명 | 현재 출근: <span id="attending-count">0</span>명</p>
+        </div>
+
+        <div class="attendance-columns">
+            
+            <div class="attendance-zone attending-zone">
+                <h2>✔️ 출근 선수</h2>
+                <div id="attending-view">
+                    </div>
+            </div>
+
+            <div class="attendance-zone not-attending-zone">
+                <h2>❌ 퇴근 선수</h2>
+                <div id="not-attending-view">
+                    </div>
+            </div>
+            
+        </div>
+    </div>
+
+    <script src="attend.js"></script>
+</body>
+</html>
