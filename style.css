@@ -152,18 +152,29 @@ h2 { margin-top: 0; }
     border-bottom: 1px dashed #777;
     font-size: 1.3em;
 }
+/* --- 이 부분 수정 --- */
 .team-member-list {
-    min-height: 30px;
-    display: flex; flex-wrap: wrap;
-    gap: 6px;
-    padding: 5px 0;
+    min-height: 30px;
+    display: flex;
+    flex-direction: row; /* ★ 가로 정렬(기본값)을 명시적으로 지정 */
+    flex-wrap: wrap;   /* ★ 공간이 없으면 다음 줄로 넘김 */
+    align-items: flex-start; /* 위쪽 기준으로 정렬 */
+    gap: 6px;
+    padding: 5px 0;
 }
+
+/* --- 이 부분 수정 --- */
 .team-member {
-    background-color: #61dafb; color: #222;
-    padding: 5px 10px; border-radius: 4px;
-    font-weight: bold; font-size: 0.9em;
-    cursor: grab;
-    transition: background-color 0.2s, color 0.2s, transform 0.1s ease-out, opacity 0.2s;
+    background-color: #61dafb; color: #222;
+    padding: 5px 10px; border-radius: 4px;
+    font-weight: bold; font-size: 0.9em;
+    cursor: grab;
+    transition: background-color 0.2s, color 0.2s, transform 0.1s ease-out, opacity 0.2s;
+
+    /* ★ 아래 3줄 추가 (크기가 제멋대로 변하는 것 방지) ★ */
+    width: auto;      /* 내용물만큼만 너비 차지 */
+    flex-grow: 0;     /* 남는 공간 차지하며 늘어나지 않기 */
+    flex-shrink: 0;   /* 공간 부족 시 찌그러지지 않기 */
 }
 .team-member:hover { background-color: #e74c3c; color: white; }
 .team-member:active { cursor: grabbing; }
@@ -319,3 +330,4 @@ h2 { margin-top: 0; }
 }
 /* 점수 계산 버튼만 글자색 예외 - 이 규칙은 .team-controls 하위 버튼에만 적용되므로 여기서는 불필요 */
 /* ... */
+
