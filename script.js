@@ -509,71 +509,60 @@ document.addEventListener('DOMContentLoaded', () => {
                 let assignedCount = 0;
                 let playersLeftToAssign = unassignedAttendees.length;
 
-                // 3. [밸런스] 선수들을 코스트(티어)별로 "버킷(bucket)"에 그룹핑
-                const buckets = {};
-                unassignedAttendees.forEach(player => {
-                    if (!buckets[player.cost]) {
-                        buckets[player.cost] = [];
-                    }
-                    buckets[player.cost].push(player);
-                });
-                
-                // 4. [밸런스] 코스트가 높은 순서대로 버킷을 정렬
-                const sortedCosts = Object.keys(buckets).map(Number).sort((a, b) => b - a); // [8, 7, 6, 5...]
+                // ( ... 1, 2 단계는 기존 코드와 동일 ... )
 
-                // 5. 버킷에서 가장 코스트가 높은 선수를 1명 꺼내는 함수
-                function getNextAvailablePlayer() {
-                    for (const cost of sortedCosts) {
-                        if (buckets[cost] && buckets[cost].length > 0) {
-                            // [랜덤요소-1] 같은 티어(코스트) 내에서는 선수를 랜덤으로 뽑음
-                            const bucket = buckets[cost];
-                            const randomIndex = Math.floor(Math.random() * bucket.length);
-                            const player = bucket.splice(randomIndex, 1)[0]; // 뽑은 선수는 버킷에서 제거
-                            return player;
-                        }
-                    }
-                    return null; // 남은 선수가 없음
-                }
+// 2. 배정할 선수 목록 (참석 O, 배정 X)
+let unassignedAttendees = players
+    .filter(p => attendanceStatus[p.name] === true && !assignedPlayerNames.has(p.name));
 
-                // 6. 모든 팀이 꽉 찰 때까지 (혹은 선수가 다 떨어질 때까지) 라운드 진행
-                let round = 0;
-                while (playersLeftToAssign > 0 && round < MAX_MEMBERS_PER_TEAM) {
-                    
-                    // 7. 이번 라운드에 선수를 받을 수 있는 팀 목록 (예: 0명인 팀, 1명인 팀...)
-                    let availableTeamsThisRound = allTeams.filter(team => team.members.length === round);
-                    
-                    if (availableTeamsThisRound.length === 0) {
-                        break;
-                    }
+// --- 3단계부터 여기부터 시작 ---
 
-                    // 8. [랜덤요소-2] 이번 라운드에 선수를 받을 팀들의 "순서"를 무작위로 섞음
-                    shuffleArray(availableTeamsThisRound);
-                    
-                    // 9. 섞인 팀 순서대로, "가장 코스트가 높은 선수"를 배정
-                    for (const team of availableTeamsThisRound) {
-                        const playerToAssign = getNextAvailablePlayer(); // 밸런스 (최고 코스트)
-                        
-                        if (playerToAssign) {
-                            team.members.push({ name: playerToAssign.name, cost: playerToAssign.cost });
-                            team.cost = team.members.reduce((sum, m) => sum + (m.cost || 0), 0); // 코스트 업데이트
-                            assignedCount++;
-                            playersLeftToAssign--;
-                            console.log(` -> ${playerToAssign.name}(${playerToAssign.cost}) 배정됨 -> ${team.name} (현재 ${team.members.length}명, ${team.cost}코스트)`);
-                        } else {
-                            break; // 배정할 선수가 더 이상 없음
-                        }
-                    }
-                    
-                    if (playersLeftToAssign === 0) {
-                        break; // 모든 선수가 배정됨
-                    }
-                    
-                    round++; // 다음 라운드 진행 (0명인 팀 -> 1명인 팀 -> 2명인 팀)
-                }
-                
-                console.log(`총 ${assignedCount}명 자동 배정 완료.`);
-                saveData();
-                renderAll();
+// 3. [밸런스] 배정할 선수들을 '코스트가 높은 순'으로 정렬
+unassignedAttendees.sort((a, b) => b.cost - a.cost);
+
+let assignedCount = 0;
+
+// 4. [밸런스] 코스트가 높은 선수부터 순서대로 배정
+for (const playerToAssign of unassignedAttendees) {
+
+    // 5. [밸런스] "현재 가장 약한 팀"을 찾는다.
+    //    - 1순위: 멤버 수가 가장 적은 팀
+    //    - 2순위: (멤버 수가 같다면) 코스트 합이 가장 낮은 팀
+
+    // (팀이 꽉 찼는지 확인)
+    const minMembers = Math.min(...allTeams.map(t => t.members.length));
+    if (minMembers >= MAX_MEMBERS_PER_TEAM) {
+        console.warn("모든 팀이 꽉 찼습니다. 남은 선수가 있지만 배정을 중단합니다.");
+        break; // 모든 팀이 꽉 찼으면 중단
+    }
+
+    // 1순위: 멤버 수가 가장 적은 팀들만 필터링
+    let eligibleTeams = allTeams.filter(t => t.members.length === minMembers);
+
+    // 2순위: 그중에서 코스트가 가장 낮은 순으로 정렬
+    eligibleTeams.sort((a, b) => a.cost - b.cost);
+
+    // 6. [밸런스] 최종 타겟 팀 = 0번째 팀 (가장 약한 팀)
+    const targetTeam = eligibleTeams[0];
+
+    // 7. 선수 배정 및 팀 코스트 갱신
+    if (targetTeam) {
+        targetTeam.members.push({ name: playerToAssign.name, cost: playerToAssign.cost });
+        // 팀 코스트를 '처음부터 다시' 계산 (정확성을 위해)
+        targetTeam.cost = targetTeam.members.reduce((sum, m) => sum + (m.cost || 0), 0);
+        assignedCount++;
+        console.log(` -> ${playerToAssign.name}(${playerToAssign.cost}) 배정됨 -> ${targetTeam.name} (현재 ${targetTeam.members.length}명, ${targetTeam.cost}코스트)`);
+    } else {
+        // (이론상 이 로그는 minMembers 체크로 인해 찍히기 어렵습니다)
+        console.warn("배정할 수 있는 팀이 없습니다.");
+        break;
+    }
+}
+// --- 9단계(for 루프 종료) ---
+
+console.log(`총 ${assignedCount}명 자동 배정 완료.`);
+saveData();
+renderAll();
             });
         } else { console.error("autoAssignButton 못 찾음"); }
 
@@ -678,3 +667,4 @@ document.addEventListener('DOMContentLoaded', () => {
     handleSplashScreen(); // 완료 후 initializePage 호출
 
 }); // DOMContentLoaded 끝
+
