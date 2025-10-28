@@ -1,0 +1,347 @@
+/* --- 기본 --- */
+html {
+    overflow-y: scroll;
+    background-color: #2c2c2c;
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    background-color: #2c2c2c;
+    color: #f0f0f0;
+    margin: 0;
+    padding: 20px;
+}
+h1, h2, h3 { color: #e0e0e0; }
+h2 { margin-top: 0; }
+
+/* --- 스플래시 스크린 & 로고 --- */
+#splash-screen {
+    position: fixed; top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-color: #2c2c2c;
+    display: flex; justify-content: center; align-items: center;
+    z-index: 9999;
+    transition: opacity 0.5s ease-out;
+}
+.header-logo {
+    max-width: 300px;
+    height: auto;
+}
+
+/* --- 2단 레이아웃 --- */
+.main-container {
+    display: none; /* JS가 flex로 변경 */
+    gap: 20px;
+    justify-content: center;
+    max-width: 1440px;
+    width: 100%;
+    margin: 0 auto;
+}
+.column {
+    background-color: #1e1e1e;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #444;
+}
+#left-column {
+    flex-basis: 60%; max-width: 800px;
+    flex-grow: 0; flex-shrink: 0;
+    position: sticky; top: 20px; align-self: flex-start;
+}
+#right-column {
+    flex-basis: 40%; max-width: 600px;
+    flex-grow: 0; flex-shrink: 0;
+}
+
+/* --- 왼쪽 컬럼 (팀 현황) --- */
+.column-header { /* 팀 현황 제목 + 버튼 영역 */
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #555;
+    padding-bottom: 8px;
+    flex-shrink: 0;
+}
+.column-header h2 {
+    margin: 5px 0 0 0;
+    border: none; padding-bottom: 0;
+}
+
+/* --- 팀 현황 버튼 레이아웃 --- */
+.team-controls { /* 버튼 전체 컨테이너 */
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex-shrink: 0;
+    align-items: flex-end; /* 우측 정렬 */
+}
+.button-row { /* 각 버튼 줄 */
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+/* 모든 버튼/링크 공통 스타일 */
+.team-controls button,
+.team-controls .button-link {
+    border: none;
+    padding: 8px 12px;
+    font-size: 0.9em;
+    border-radius: 5px; /* 기본 둥근 모서리 */
+    cursor: pointer;
+    font-weight: bold;
+    color: white !important;
+    text-decoration: none !important;
+    min-width: 140px;
+    text-align: center;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+/* 링크 상태별 스타일 명시 */
+.team-controls .button-link:link,
+.team-controls .button-link:visited {
+    color: white !important; /* 점수 계산 버튼 제외 */
+    text-decoration: none !important;
+}
+
+/* 개별 버튼 색상 */
+#score-page-button { background-color: #f1c40f; color: #2c3e50 !important; }
+#score-page-button:hover { background-color: #f39c12; }
+#copy-teams-button { background-color: #f39c12; }
+#copy-teams-button:hover { background-color: #e67e22; }
+#copy-teams-button.copied { background-color: #27ae60; }
+#save-image-button { background-color: #9b59b6; }
+#save-image-button:hover { background-color: #8e44ad; }
+#auto-assign-button { background-color: #3498db; }
+#auto-assign-button:hover { background-color: #2980b9; }
+#add-team-button { background-color: #2ecc71; }
+#add-team-button:hover { background-color: #27ae60; }
+#reset-all-button { background-color: #e74c3c; }
+#reset-all-button:hover { background-color: #c0392b; }
+/* --- 버튼 스타일 끝 --- */
+
+#all-teams-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+.team-box {
+    background-color: #222;
+    border: 3px solid #555;
+    border-radius: 8px;
+    padding: 15px; padding-bottom: 45px;
+    transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+    cursor: pointer;
+    position: relative;
+}
+.team-box.active {
+    border-color: #61dafb;
+    box-shadow: 0 0 10px #61dafb80;
+}
+/* 팀 박스 드롭존 시각 효과 */
+.team-box.drag-over-team {
+    border-color: #61dafb;
+    box-shadow: 0 0 10px #61dafb80;
+    background-color: #2a2a2a;
+}
+.team-box h3 {
+    margin-top: 0;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed #777;
+    font-size: 1.3em;
+}
+.team-member-list {
+    min-height: 30px;
+    display: flex; flex-wrap: wrap;
+    gap: 6px;
+    padding: 5px 0;
+}
+.team-member {
+    background-color: #61dafb; color: #222;
+    padding: 5px 10px; border-radius: 4px;
+    font-weight: bold; font-size: 0.9em;
+    cursor: grab;
+    transition: background-color 0.2s, color 0.2s, transform 0.1s ease-out, opacity 0.2s;
+}
+.team-member:hover { background-color: #e74c3c; color: white; }
+.team-member:active { cursor: grabbing; }
+/* 팀원 드래그 시각 효과 */
+.team-member.dragging-member {
+    opacity: 0.4; border: 1px dashed #fff; transform: scale(1.05);
+}
+
+.team-box-buttons {
+    position: absolute; bottom: 10px; right: 15px;
+    display: flex; gap: 5px;
+}
+.clear-team-button, .remove-team-button {
+    background-color: #95a5a6; color: #222;
+    border: none; padding: 6px 10px; border-radius: 4px;
+    cursor: pointer; font-size: 0.8em;
+}
+.clear-team-button:hover { background-color: #7f8c8d; }
+.remove-team-button { background-color: #e74c3c; color: white; }
+.remove-team-button:hover { background-color: #c0392b; }
+
+
+/* --- 오른쪽 컬럼 (선수 목록) --- */
+.right-column-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #555;
+    padding-bottom: 8px;
+    margin-bottom: 15px;
+}
+#right-column h2 {
+    border: none; padding: 0; margin: 0;
+}
+.header-button-group {
+    display: flex; gap: 8px;
+}
+/* 관리 버튼 개별 스타일 (공통 .button-link 상속 및 수정) */
+#attend-page-button, #tier-page-button {
+    padding: 6px 10px; font-size: 0.85em;
+    min-width: auto; /* 최소 너비 제거 */
+    border-radius: 5px; /*  둥근 모서리 적용 */
+}
+#attend-page-button { background-color: #3498db; }
+#attend-page-button:hover { background-color: #2980b9; }
+#tier-page-button { background-color: #7f8c8d; }
+#tier-page-button:hover { background-color: #95a5a6; }
+
+.add-player-form {
+    background-color: #202020; border: 1px solid #444; border-radius: 8px;
+    padding: 15px; margin-bottom: 15px;
+    display: flex; gap: 10px; align-items: center;
+    flex-shrink: 0;
+}
+.add-player-form input[type="text"], .add-player-form select {
+    background-color: #333; color: white;
+    border: 1px solid #555; border-radius: 4px;
+    padding: 8px 10px; font-size: 0.95em;
+    flex-shrink: 0;
+}
+.add-player-form input[type="text"] { flex: 1 1 180px; }
+.add-player-form button {
+    background-color: #2ecc71; color: white;
+    border: none; padding: 8px 15px; border-radius: 4px;
+    cursor: pointer; font-weight: bold; flex-shrink: 0;
+}
+.add-player-form button:hover { background-color: #27ae60; }
+
+#player-list {
+    display: flex; flex-direction: column; gap: 15px;
+}
+.tier-group {
+    background-color: #202020; border: 1px solid #444; border-radius: 8px;
+    padding: 10px 15px;
+    flex-shrink: 0;
+}
+.tier-group h3 {
+    margin: 5px 0 15px 0; padding-bottom: 10px;
+    border-bottom: 1px solid #555;
+    font-size: 1.2em; color: #eee;
+}
+.player-button-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 8px;
+    min-height: 30px;
+}
+/* 티어 변경 드롭존 시각 효과 */
+.player-button-group.drag-over {
+    background-color: #333; border: 1px dashed #61dafb;
+}
+
+
+.player-button {
+    position: relative;
+    background-color: #444; color: white;
+    border: 2px solid #666;
+    padding: 8px 12px; padding-right: 25px;
+    border-radius: 5px;
+    cursor: grab;
+    font-size: 0.95em; font-weight: 500;
+    transition: background-color 0.2s, border-color 0.2s, opacity 0.2s;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: left;
+}
+.player-button:hover:not(:disabled) { background-color: #555; border-color: #888; }
+.player-button:active { cursor: grabbing; }
+.player-button.dragging { opacity: 0.4; border: 2px dashed white; }
+
+.delete-player-btn {
+    position: absolute; top: 0; right: 0; bottom: 0;
+    width: 25px;
+    display: flex; align-items: center; justify-content: center;
+    color: #aaa; font-size: 1.2em; font-weight: bold;
+    border-radius: 0 4px 4px 0;
+    transition: background-color 0.2s, color 0.2s;
+    cursor: pointer;
+}
+.delete-player-btn:hover { background-color: #e74c3c; color: white; }
+
+/* 티어별 버튼 테두리 색상 */
+[data-tier="SSS"] .player-button { border-color: #ffd700; }
+[data-tier="SS"]  .player-button { border-color: #e74c3c; }
+[data-tier="S"]   .player-button { border-color: #3498db; }
+[data-tier="A"]   .player-button { border-color: #9b59b6; }
+[data-tier="B"]   .player-button { border-color: #2ecc71; }
+[data-tier="C"]   .player-button { border-color: #f39c12; }
+[data-tier="D"]   .player-button { border-color: #bdc3c7; }
+[data-tier="F"]   .player-button { border-color: #95a5a6; }
+
+/* 선수 버튼 상태별 스타일 */
+.player-button.selected { /* 팀에 배정됨 */
+    background-color: #3a3a3a; border-color: #3a3a3a; color: white;
+    opacity: 0.5; cursor: not-allowed; text-decoration: line-through;
+}
+.player-button.disabled { /* 팀 배정 불가 */
+    background-color: #3a3a3a; border-color: #3a3a3a; color: #777;
+    opacity: 0.6; cursor: not-allowed;
+}
+.player-button.selected .delete-player-btn,
+.player-button.disabled .delete-player-btn {
+    display: none;
+}
+
+/* [★최후 수단★] 헤더 버튼 링크 밑줄 강제 제거 */
+/* (이 부분은 이전과 동일하게 유지) */
+#right-column .right-column-header .header-button-group a.button-link,
+#right-column .right-column-header .header-button-group a.button-link:link,
+#right-column .right-column-header .header-button-group a.button-link:visited {
+    text-decoration: none !important;
+    color: white !important; /* 글자색도 다시 한번 확인 */
+}
+/* 점수 계산 버튼만 글자색 예외 - 이 규칙은 .team-controls 하위 버튼에만 적용되므로 여기서는 불필요 */
+/* ... */
+
+/* ---  좌상단 메인 로고 버튼 스타일 --- */
+.top-left-logo {
+    position: fixed;
+    top: 15px;
+    left: 20px;
+    z-index: 9000; /* 다른 요소 위에 표시 */
+    display: block;
+    padding: 0;
+    margin: 0;
+    line-height: 0;
+    border-radius: 5px;
+    transition: transform 0.2s;
+}
+
+.top-left-logo img {
+    width: 40px; /* 로고 크기 조정 */
+    height: 40px;
+    border-radius: 3px;
+    border: 2px solid transparent;
+}
+
+.top-left-logo:hover {
+    transform: scale(1.05);
+    border-color: #61dafb; /* 마우스 오버 시 테두리 색상 */
+}

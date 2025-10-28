@@ -1,0 +1,99 @@
+/* login.css */
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.login-container {
+    max-width: 450px;
+    width: 90%;
+    background-color: #1e1e1e;
+    padding: 30px;
+    border-radius: 8px;
+    border: 1px solid #444;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+}
+
+.login-container h1 {
+    font-size: 1.8em;
+    border-bottom: 2px solid #555;
+    padding-bottom: 10px;
+    margin-bottom: 25px;
+}
+
+.login-form-box p {
+    color: #bbb;
+    margin-bottom: 15px;
+    font-size: 0.9em;
+}
+
+#master-password {
+    width: calc(100% - 22px); /* padding 10px * 2 + border 1px * 2 */
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #555;
+    border-radius: 4px;
+    background-color: #333;
+    color: white;
+    font-size: 1em;
+    box-sizing: border-box;
+}
+
+#login-button {
+    width: 100%;
+    padding: 10px;
+    background-color: #3498db;
+    color: white;
+    font-size: 1.1em;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+#login-button:hover {
+    background-color: #2980b9;
+}
+
+.login-message-box {
+    font-weight: bold;
+    margin-top: 15px;
+    min-height: 20px;
+}
+.login-message-box.error {
+    color: #e74c3c; /* 실패 */
+}
+.login-message-box.success {
+    color: #2ecc71; /* 성공 */
+}
+
+
+/* --- 뒤로가기 버튼 스타일 (공용 스타일 재사용) --- */
+.button-wrapper {
+    margin-top: 25px;
+}
+#back-button {
+    background-color: #95a5a6;
+    color: #2c3e50;
+    font-weight: bold;
+}
+#back-button:hover {
+    background-color: #7f8c8d;
+}
+
+/* style.css의 .button-link 스타일이 로드된다고 가정 */
+.button-link {
+    display: inline-block;
+    border: none;
+    padding: 8px 12px;
+    font-size: 0.9em;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    text-decoration: none;
+    color: white;
+}

@@ -1,0 +1,188 @@
+/* --- 기본 --- */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    background-color: #2c2c2c;
+    color: #f0f0f0;
+    margin: 0;
+    padding: 20px;
+}
+h1 { border-bottom: 2px solid #555; padding-bottom: 8px; color: #e0e0e0; margin-top: 0; margin-bottom: 15px; text-align: center; }
+h2 { font-size: 1.2em; padding-bottom: 5px; border-bottom: 1px dashed #555; margin-top: 0; margin-bottom: 15px; }
+
+/* --- 메인 컨테이너 --- */
+.attend-container {
+    max-width: 1200px; /* 너비 확장 */
+    margin: 0 auto;
+    background-color: #1e1e1e;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #444;
+}
+
+/* ---  선수 추가 폼 스타일 --- */
+.add-player-form-attend { 
+    background-color: #252525; /* 어두운 배경 */
+    border: 1px solid #444; 
+    border-radius: 8px; 
+    padding: 15px; 
+    margin-bottom: 20px; 
+    display: flex; 
+    gap: 10px; 
+    align-items: center; 
+}
+.add-player-form-attend input, 
+.add-player-form-attend select { 
+    background-color: #333; 
+    color: white; 
+    border: 1px solid #555; 
+    border-radius: 4px; 
+    padding: 8px 10px; 
+    font-size: 0.9em; 
+    flex-shrink: 0; 
+}
+.add-player-form-attend input[type="text"] { 
+    flex-grow: 1; /* 이름 입력창이 공간을 채우도록 */
+}
+.add-player-form-attend button {
+    background-color: #2ecc71; /* 초록색 */
+    color: white;
+    flex-shrink: 0;
+    padding: 8px 15px;
+    font-weight: bold;
+    font-size: 0.9em;
+    border: none; /* 버튼 테두리 제거 */
+    border-radius: 4px; /* 버튼 모서리 둥글게 */
+}
+.add-player-form-attend button:hover {
+    background-color: #27ae60;
+}
+
+/* --- 상단 버튼/정보 --- */
+.button-link { display: inline-block; border: none; padding: 8px 12px; font-size: 0.9em; border-radius: 5px; cursor: pointer; font-weight: bold; text-decoration: none; color: #2c3e50; }
+.button-wrapper { justify-content: flex-start; margin-bottom: 20px; }
+#back-button { background-color: #95a5a6; }
+#back-button:hover { background-color: #7f8c8d; }
+
+.info-box { background-color: #222; border: 1px solid #444; border-radius: 5px; padding: 10px 15px; margin-bottom: 20px; font-size: 0.9em; color: #ccc; }
+.info-box p { margin: 5px 0; }
+
+/* --- 뷰 전환 컨트롤 --- */
+.view-controls { display: flex; gap: 10px; margin-bottom: 20px; }
+.view-controls button { background-color: #444; color: white; padding: 6px 12px; border: 1px solid #666; border-radius: 4px; cursor: pointer; font-size: 0.85em; }
+.view-controls button.active { background-color: #3498db; border-color: #3498db; font-weight: bold; }
+
+/* ---  2열 출석 영역 --- */
+.attendance-columns {
+    display: flex;
+    gap: 20px;
+}
+.attendance-zone {
+    flex-grow: 1;
+    background-color: #202020;
+    border: 1px solid #444;
+    padding: 15px;
+    border-radius: 8px;
+}
+.attending-zone h2 { color: #2ecc71; }
+.not-attending-zone h2 { color: #e74c3c; }
+
+/* --- 목록 공통 스타일 --- */
+.player-list-view, .tier-section-list {
+    list-style: none; padding: 0; margin: 0;
+    display: grid; 
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); /* 140px 최소 너비 */
+    gap: 8px;
+}
+/* 티어별 보기 섹션 */
+.tier-section {
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed #444;
+}
+.tier-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+.tier-section h3 {
+    margin: 0 0 10px 0;
+    font-size: 1.0em;
+}
+
+/* ---  개별 선수 아이템 (클릭 가능) --- */
+.player-item {
+    background-color: #2a2a2a;
+    border: 1px solid #555;
+    border-radius: 5px;
+    padding: 8px 10px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    user-select: none;
+    font-size: 0.9em;
+}
+.player-item:hover {
+    background-color: #3a3a3a;
+}
+
+/* ---  상태 포인트 스타일 --- */
+.status-point {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 8px;
+    flex-shrink: 0;
+}
+
+/* 출근 상태 */
+.player-item.attending {
+    border-color: #2ecc71;
+    order: -1; /* 출근 상태를 Grid 시작점으로 이동 (정렬 유지) */
+}
+.player-item.attending .status-point {
+    background-color: #2ecc71; /* 초록색 점 */
+}
+
+/* 퇴근 상태 */
+.player-item.not-attending {
+    border-color: #e74c3c;
+    opacity: 0.9;
+}
+.player-item.not-attending .status-point {
+    background-color: #e74c3c; /* 빨간색 점 */
+}
+
+/* ---  좌상단 로고 버튼 크기 통일 --- */
+.top-left-logo {
+    position: fixed;
+    top: 15px;
+    left: 20px;
+    z-index: 9000;
+    border: 2px solid transparent;
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+.top-left-logo img {
+    width: 40px; /* 로고 크기를 40px로 통일 */
+    height: 40px;
+    border-radius: 3px;
+}
+.top-left-logo:hover {
+    transform: scale(1.05);
+    border-color: #61dafb;
+}
+
+/* --- 드래그 앤 드롭 스타일 (attend.css) --- */
+
+/* 드래그 중인 아이템 */
+.player-item.dragging {
+    opacity: 0.4;
+    border: 2px dashed #ccc;
+}
+
+/* 드롭 대상 강조 효과 (출퇴근 구역이나 티어 리스트) */
+.player-list-view.drag-over {
+    background-color: #333; /* 어두운 배경색 변경 */
+    border: 2px dashed #61dafb; /* 밝은 테두리 */
+    transition: background-color 0.2s;
+}

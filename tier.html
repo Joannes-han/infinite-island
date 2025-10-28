@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>선수 티어 관리</title>
+    <link rel="stylesheet" href="tier.css">
+</head>
+<body>
+    <a href="index.html" class="top-left-logo" title="메인 허브로 돌아가기">
+        <img src="무한섬_로고.png" alt="허브 로고">
+    </a>
+
+    <div class="tier-maker-container">
+        <h1>선수 티어 관리</h1>
+
+        <div class="button-wrapper">
+            <a href="draft.html" class="button-link" id="back-button">⬅️ 팀 배정으로 가기</a>
+            <button id="save-tier-button">💾 변경사항 저장</button>
+        </div>
+        
+
+
+        <div class="tier-rows">
+            <div class="tier-row" data-tier="SSS" data-cost="8"><span class="tier-label sss">SSS (8)</span><div class="player-bubbles"></div></div>
+            <div class="tier-row" data-tier="SS" data-cost="7"><span class="tier-label ss">SS (7)</span><div class="player-bubbles"></div></div>
+            <div class="tier-row" data-tier="S" data-cost="6"><span class="tier-label s">S (6)</span><div class="player-bubbles"></div></div>
+            <div class="tier-row" data-tier="A" data-cost="5"><span class="tier-label a">A (5)</span><div class="player-bubbles"></div></div>
+            <div class="tier-row" data-tier="B" data-cost="4"><span class="tier-label b">B (4)</span><div class="player-bubbles"></div></div>
+            <div class="tier-row" data-tier="C" data-cost="3"><span class="tier-label c">C (3)</span><div class="player-bubbles"></div></div>
+            <div class="tier-row" data-tier="D" data-cost="2"><span class="tier-label d">D (2)</span><div class="player-bubbles"></div></div>
+            <div class="tier-row" data-tier="F" data-cost="1"><span class="tier-label f">F (1)</span><div class="player-bubbles"></div></div>
+        </div>
+
+        <hr class="divider">
+
+        <h2>선수 목록 (드래그하여 위 티어에 배치하세요)</h2>
+        <div id="player-pool" class="tier-row unranked">
+            <div class="player-bubbles">
+                </div>
+        </div>
+        
+        <div class="add-player-form-tier">
+            <h3>새 선수 추가</h3>
+            <input type="text" id="new-player-name-tier" placeholder="선수 이름">
+            <button id="add-player-button-tier">➕ 선수 추가</button>
+        </div>
+
+    </div>
+
+    <script src="tier.js"></script>
+</body>
+</html>

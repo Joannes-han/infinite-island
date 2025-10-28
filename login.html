@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 로그인</title>
+    <link rel="stylesheet" href="style.css"> <link rel="stylesheet" href="login.css"> </head>
+<body>
+    <a href="index.html" class="top-left-logo" title="메인 허브로 돌아가기">
+        <img src="무한섬_로고.png" alt="허브 로고">
+    </a>
+
+    <div class="login-container">
+        <h1>관리자 로그인</h1>
+        
+        <div class="login-form-box">
+            <p>데이터 수정 권한을 얻으려면 MASTER KEY를 입력하세요.</p>
+            <input type="password" id="master-password" placeholder="MASTER KEY" required>
+            <button id="login-button">로그인</button>
+            <p id="login-message" class="login-message-box"></p>
+        </div>
+
+        <div class="button-wrapper">
+            <a href="index.html" class="button-link" id="back-button">⬅️ 메인 허브로 돌아가기</a>
+        </div>
+    </div>
+
+    <script src="login.js"></script>
+</body>
+</html>

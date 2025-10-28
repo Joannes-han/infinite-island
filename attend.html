@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>출퇴근 관리</title>
+    <link rel="stylesheet" href="attend.css">
+</head>
+<body>
+    <a href="index.html" class="top-left-logo" title="메인 허브로 돌아가기">
+        <img src="무한섬_로고.png" alt="허브 로고">
+    </a>
+
+    <div class="attend-container">
+        <h1>출석 관리</h1>
+
+        <div class="button-wrapper">
+            <a href="draft.html" class="button-link" id="back-button">⬅️ 팀 배정으로 돌아가기</a>
+        </div>
+
+        <div class="view-controls">
+            <button id="view-tier-button">티어별 보기</button>
+            <button id="view-all-button" class="active">모든 선수 보기</button>
+        </div>
+
+        <div class="info-box">
+            <p>선수 이름을 클릭하여 상태를 변경하세요. (✔️ 출근: 팀 배정 페이지에 표시됨)</p>
+            <p>총 선수: <span id="total-count">0</span>명 | 현재 출근: <span id="attending-count">0</span>명</p>
+        </div>
+        <div class="attend-container">
+        
+        
+        <div class="add-player-form-attend">
+            <input type="text" id="new-player-name-attend" placeholder="선수 이름">
+            <select id="new-player-cost-attend">
+                <option value="8">8 코스트 (SSS)</option>
+                <option value="7">7 코스트 (SS)</option>
+                <option value="6">6 코스트 (S)</option>
+                <option value="5">5 코스트 (A)</option>
+                <option value="4">4 코스트 (B)</option>
+                <option value="3">3 코스트 (C)</option>
+                <option value="2">2 코스트 (D)</option>
+                <option value="1">1 코스트 (F)</option>
+            </select>
+            <button id="add-player-button-attend">➕ 선수 추가</button>
+        </div>
+
+        <div class="attendance-columns">
+            
+            <div class="attendance-zone attending-zone">
+                <h2>✔️ 출근 선수</h2>
+                <div id="attending-view">
+                    </div>
+            </div>
+
+            <div class="attendance-zone not-attending-zone">
+                <h2>❌ 퇴근 선수</h2>
+                <div id="not-attending-view">
+                    </div>
+            </div>
+            
+        </div>
+    </div>
+
+    <script src="attend.js"></script>
+</body>
+</html>

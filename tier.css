@@ -1,0 +1,255 @@
+/* --- 기본 --- */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    background-color: #2c2c2c;
+    color: #f0f0f0;
+    margin: 0;
+    padding: 20px;
+}
+
+h1 {
+    border-bottom: 2px solid #555;
+    padding-bottom: 8px;
+    color: #e0e0e0;
+    margin-top: 0;
+    margin-bottom: 15px;
+    text-align: center;
+}
+h2 {
+    color: #e0e0e0;
+    margin-top: 30px;
+    margin-bottom: 10px;
+    text-align: center;
+    font-size: 1.2em;
+}
+
+/* --- 메인 컨테이너 --- */
+.tier-maker-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    background-color: #1e1e1e;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #444;
+}
+
+/* --- 버튼 스타일 --- */
+.button-link, button {
+    display: inline-block;
+    border: none;
+    padding: 8px 12px;
+    font-size: 0.9em;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    text-decoration: none;
+    color: white;
+}
+.button-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+#back-button { background-color: #95a5a6; color: #2c3e50; }
+#back-button:hover { background-color: #7f8c8d; }
+#save-tier-button { background-color: #2ecc71; }
+#save-tier-button:hover { background-color: #27ae60; }
+#save-tier-button.saved { background-color: #27ae60; }
+
+
+/* --- 티어 행 스타일 --- */
+.tier-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 5px; /* 행 사이 간격 */
+}
+.tier-row {
+    display: flex;
+    background-color: #222;
+    border: 2px solid #444;
+    min-height: 70px; /* 최소 높이 */
+    align-items: stretch; /* 내부 요소 높이 맞춤 */
+}
+.tier-label {
+    display: flex;
+    align-items: center; /* 라벨 텍스트 세로 중앙 */
+    justify-content: center; /* 라벨 텍스트 가로 중앙 */
+    /* writing-mode: vertical-rl; <-- 삭제 */
+    /* text-orientation: mixed;   <-- 삭제 */
+    font-weight: bold;
+    font-size: 1.1em;
+    padding: 0 15px; /*  좌우 패딩만 적용 */
+    width: 60px; /*  고정 너비 설정 (조절 가능) */
+    text-align: center;
+    color: #1e1e1e; /* 어두운 배경색 글자 */
+    border-right: 2px solid #444; /*  오른쪽 구분선 (기존 .player-bubbles의 border-left 대체) */
+}
+
+/*  기존 .player-bubbles의 왼쪽 테두리 제거 */
+.player-bubbles {
+    border-left: none; /* 이제 라벨 오른쪽에 구분선이 있음 */
+}
+/* 티어별 라벨 색상 */
+.tier-label.sss { background-color: #ff7f7f; } /* SSS */
+.tier-label.ss { background-color: #ffbf7f; }  /* SS */
+.tier-label.s { background-color: #ffff7f; }   /* S */
+.tier-label.a { background-color: #bfff7f; }   /* A */
+.tier-label.b { background-color: #7fff7f; }   /* B */
+.tier-label.c { background-color: #7fbfff; }   /* C */
+.tier-label.d { background-color: #7f7fff; }   /* D */
+.tier-label.f { background-color: #bf7fbf; }   /* F */
+
+.player-bubbles {
+    flex-grow: 1; /* 남는 공간 차지 */
+    display: flex;
+    flex-wrap: wrap; /* 버블 자동 줄바꿈 */
+    align-content: flex-start; /* 위쪽부터 쌓이도록 */
+    padding: 10px;
+    gap: 8px; /* 버블 사이 간격 */
+    border-left: 2px solid #444; /* 라벨과 구분선 */
+}
+
+/* 선수 대기열 스타일 */
+.tier-row.unranked {
+    background-color: #1a1a1a;
+    border-color: #333;
+    min-height: 100px;
+}
+#player-pool .player-bubbles {
+    border-left: none; /* 대기열은 라벨 없음 */
+}
+
+/* 구분선 */
+.divider {
+    border: none;
+    border-top: 2px dashed #555;
+    margin: 25px 0;
+}
+
+
+/* --- 선수 버블 스타일 --- */
+.player-bubble {
+    background-color: #444;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: grab; /* 드래그 가능 표시 */
+    font-size: 0.9em;
+    font-weight: 500;
+    display: inline-flex; /* 내부 정렬 위해 */
+    align-items: center;
+    position: relative; /* 삭제 버튼 위치 기준 */
+    border: 1px solid #666;
+    transition: transform 0.1s ease-out; /* 드래그 시 약간 뜨는 효과 */
+}
+.player-bubble:active {
+    cursor: grabbing; /* 드래그 중 표시 */
+}
+
+/* 선수 삭제 버튼 (버블 우측 상단) */
+.delete-bubble-btn {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 18px;
+    height: 18px;
+    line-height: 16px;
+    text-align: center;
+    background-color: #e74c3c;
+    color: white;
+    border-radius: 50%;
+    font-size: 0.9em;
+    font-weight: bold;
+    cursor: pointer;
+    opacity: 0; /* 평소엔 숨김 */
+    transition: opacity 0.2s;
+}
+.player-bubble:hover .delete-bubble-btn {
+    opacity: 1; /* 마우스 올리면 보임 */
+}
+
+
+/* --- 드래그 앤 드롭 시각 효과 --- */
+.player-bubble.dragging {
+    opacity: 0.5;
+    transform: scale(1.05); /* 약간 크게 */
+}
+.tier-row.drag-over {
+    border-color: #61dafb; /* 드롭 가능 영역 테두리 */
+    background-color: #2a2a2a;
+}
+
+/*  새 선수 추가 폼 (tier.html) */
+.add-player-form-tier {
+    background-color: #202020;
+    border: 1px solid #444;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 25px; /* 대기열과의 간격 */
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+.add-player-form-tier h3 {
+    margin: 0;
+    color: #eee;
+    font-size: 1.1em;
+    flex-shrink: 0; /* 줄어들지 않음 */
+    margin-right: 10px;
+}
+.add-player-form-tier input[type="text"], 
+.add-player-form-tier select {
+    background-color: #333;
+    color: white;
+    border: 1px solid #555;
+    border-radius: 4px;
+    padding: 8px 10px;
+    font-size: 0.95em;
+    flex-shrink: 0;
+}
+.add-player-form-tier input[type="text"] {
+    flex-grow: 1; /* 남는 공간 차지 */
+}
+.add-player-form-tier button {
+    background-color: #2ecc71;
+    color: white;
+    flex-shrink: 0;
+}
+.add-player-form-tier button:hover {
+    background-color: #27ae60;
+}
+
+/*  새 선수 추가 폼 (tier.html) */
+.add-player-form-tier {
+    background-color: #202020;
+    border: 1px solid #444;
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 25px; /*  대기열과의 간격 */
+    margin-bottom: 0; /* 기존 bottom 제거 */
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+/* ... (나머지 .add-player-form-tier 내부 스타일은 동일) ... */
+
+/* --- 좌상단 로고 버튼 크기 통일 --- */
+.top-left-logo {
+    position: fixed;
+    top: 15px;
+    left: 20px;
+    z-index: 9000;
+    border: 2px solid transparent;
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+.top-left-logo img {
+    width: 40px; /* 로고 크기를 40px로 통일 */
+    height: 40px;
+    border-radius: 3px;
+}
+.top-left-logo:hover {
+    transform: scale(1.05);
+    border-color: #61dafb;
+}
