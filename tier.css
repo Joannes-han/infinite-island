@@ -45,15 +45,41 @@ h2 {
     text-decoration: none;
     color: white;
 }
+
+
+/* [★수정★] .button-wrapper를 Flexbox (space-between)로 변경 */
 .button-wrapper {
     display: flex;
-    justify-content: space-between;
+    justify-content: space-between; /* 양쪽 끝으로 정렬 */
     align-items: center;
     margin-bottom: 25px;
 }
-#back-button { background-color: #95a5a6; color: #2c3e50; }
+/* [★추가★] 왼쪽 네비게이션 버튼 그룹 */
+.nav-buttons {
+    display: flex;
+    gap: 10px; /* 버튼 사이 간격 */
+}
+
+/* '팀 배정으로 가기' 버튼 스타일 */
+#back-button {
+    background-color: #95a5a6;
+    color: #2c3e50;
+}
 #back-button:hover { background-color: #7f8c8d; }
-#save-tier-button { background-color: #2ecc71; }
+
+/* [★추가★] '출근 관리' 버튼 스타일 */
+#attend-page-button {
+    background-color: #3498db; /* 하늘색 */
+    color: white;
+}
+#attend-page-button:hover {
+    background-color: #2980b9;
+}
+
+/* '변경사항 저장' 버튼 스타일 */
+#save-tier-button {
+    background-color: #2ecc71;
+}
 #save-tier-button:hover { background-color: #27ae60; }
 #save-tier-button.saved { background-color: #27ae60; }
 
@@ -252,4 +278,31 @@ h2 {
 .top-left-logo:hover {
     transform: scale(1.05);
     border-color: #61dafb;
+}
+
+/* --- 버튼 스타일 --- */
+/* ... (기존 .button-link, button 스타일) ... */
+
+/* [★확인★] .button-wrapper Flexbox 설정 */
+.button-wrapper {
+    display: flex;
+    justify-content: space-between; /* 양쪽 끝으로 정렬 */
+    align-items: center;
+    margin-bottom: 25px;
+}
+/* [★확인★] 왼쪽 네비게이션 버튼 그룹 */
+.nav-buttons {
+    display: flex;
+    gap: 10px; /* 버튼 사이 간격 */
+}
+
+/* ... (기존 #back-button, #save-tier-button 스타일) ... */
+
+/* [★확인★] '출근 관리' 버튼 스타일 (없으면 추가) */
+#attend-page-button {
+    background-color: #3498db; /* 하늘색 */
+    color: white;
+}
+#attend-page-button:hover {
+    background-color: #2980b9;
 }
