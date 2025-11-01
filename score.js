@@ -1,5 +1,5 @@
 
-const TOTAL_ROUNDS = 6; // 총 라운드 수
+const TOTAL_ROUNDS = 3; // 총 라운드 수
 // 점수 저장을 위한 localStorage 키
 const SCORE_STORAGE_KEY = 'savedRoundScores'; 
 
@@ -224,18 +224,17 @@ document.addEventListener('DOMContentLoaded', () => {
         // 2. 점수 초기화 버튼
         resetScoresButton.addEventListener('click', resetScores);
         
-        // 이미지 저장 버튼 이벤트 리스너
+        //이미지 저장 버튼 (캡처 영역 변경)
     saveImageButton.addEventListener('click', () => {
-        // [★수정★] 캡처할 영역의 DOM 요소를 정확히 지정
-        const captureArea = document.querySelector('.score-table-container'); 
+        // 캡처할 영역을 #score-table (테이블만)로 변경
+        const captureArea = document.getElementById('score-table'); 
         
         if (!captureArea) {
-            alert('캡처할 점수표 영역을 찾을 수 없습니다.');
-            console.error('HTML 요소 .score-table-container 를 찾을 수 없음.');
+            alert('캡처할 점수표 영역(#score-table)을 찾을 수 없습니다.');
             return;
         }
 
-        html2canvas(captureArea, { // ★ 이 부분만 변경됩니다.
+        html2canvas(captureArea, { //  이 부분만 변경됩니다.
             backgroundColor: '#1e1e1e', 
             useCORS: true
         }).then(canvas => {
