@@ -18,7 +18,7 @@ h1 {
 
 /* --- 메인 컨테이너 --- */
 .score-container {
-    max-width: 1200px; /* 테이블이 길어져서 너비 확장 */
+    max-width: 900px; /* 테이블이 길어져서 너비 확장 */
     margin: 0 auto;
     background-color: #1e1e1e;
     padding: 20px;
@@ -145,7 +145,7 @@ h1 {
 }
 #multiplier-inputs {
     display: grid;
-    grid-template-columns: repeat(6, 1fr); /* 6개 라운드 */
+    grid-template-columns: repeat(3, 1fr); /* 3개 라운드 */
     gap: 10px;
 }
 /* 설정 입력창 공통 스타일 */
@@ -160,6 +160,7 @@ h1 {
     font-size: 1em;
     text-align: center;
     box-sizing: border-box; /* 패딩 포함 너비 계산 */
+    min-width: 50px;
 }
 
 
@@ -167,7 +168,7 @@ h1 {
 #score-table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 20px;
+    margin-top: 10px;
 }
 
 #score-table thead {
@@ -177,32 +178,40 @@ h1 {
 #score-table th, 
 #score-table td {
     border: 1px solid #444;
-    padding: 12px;
+    padding: 10x 10px;
     text-align: center; /* 중앙 정렬 */
     vertical-align: middle;
+    font-size: 0.95em;
+    white-space: nowrap;
 }
 
-#score-table th {
-    color: #eee;
-}
-
-/* 팀원 목록은 왼쪽 정렬 */
-#score-table td:nth-child(2) {
+#score-table th { color: #eee; }
+#score-table td:nth-child(1) { width: 15%; }
+#score-table td:nth-child(2) { /* 팀원 목록만 왼쪽 정렬 */
     text-align: left;
     font-size: 0.9em;
     color: #ccc;
+    width: 25%;
+    white-space: normal;
+    padding-left: 15px; /*  왼쪽 여백을 더 줌 (팀 이름과 분리) */
 }
 
-/* 라운드 점수 입력창 */
+/*  라운드 점수 입력창 ('버블' 제거) */
 .round-score-input {
-    width: 60px;
-    background-color: #3a3a3a;
-    color: white;
-    border: 1px solid #555;
-    border-radius: 4px;
-    padding: 8px;
-    font-size: 1em;
+    width: 100%; /*  셀 너비 100% 채우기 */
+    background-color: transparent; /*  배경 투명 */
+    color: white; /* 글자색은 흰색 유지 */
+    border: none; /*  테두리 제거 */
+    border-radius: 0; /*  모서리 제거 */
+    padding: 8px 4px; /*  세로 높이(패딩) 확보 */
+    font-size: 1.1em; /*  폰트 크기를 키워 가독성 확보 */
     text-align: center;
+    box-sizing: border-box; /* 패딩 포함 너비 계산 */
+}
+/*  입력창 포커스 시 배경색 살짝 변경 (입력 중임을 표시) */
+.round-score-input:focus {
+    background-color: #333;
+    outline: 1px solid #555;
 }
 
 /* 최종 점수 & 체크포인트 */
@@ -247,4 +256,17 @@ input[type="number"]::-webkit-inner-spin-button {
 .top-left-logo:hover {
     transform: scale(1.05);
     border-color: #61dafb;
+}
+
+/*  점수표 헤더 간격 조정 */
+#score-table th:nth-last-child(2) { /* '최종 점수' 헤더 */
+    padding-right: 15px; /* 오른쪽에 여백 추가 */
+    padding-left: 15px; /* 왼쪽에 여백 추가 */
+    box-sizing: border-box; /* 패딩 포함 크기 계산 */
+}
+
+#score-table th:last-child { /* '체크포인트' 헤더 */
+    padding-right: 15px; /* 오른쪽에 여백 추가 */
+    padding-left: 15px; /* 왼쪽에 여백 추가 */
+    box-sizing: border-box; /* 패딩 포함 크기 계산 */
 }
