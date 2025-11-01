@@ -4,13 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>점수 계산 페이지</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <!-- html2canvas 라이브러리 (이미지 저장용) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" xintegrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <link rel="stylesheet" href="score.css">
 </head>
 <body>
+    <!-- 좌상단 로고 버튼 -->
     <a href="index.html" class="top-left-logo" title="메인 허브로 돌아가기">
         <img src="무한섬_로고.png" alt="허브 로고">
     </a>
+    
 
     <div class="score-container">
         <h1>점수 계산</h1>
@@ -28,23 +31,18 @@
                 <div id="round-multipliers-container">
                     <label>라운드 배율</label>
                     <div id="multiplier-inputs">
-                        </div>
+                        <!-- JS가 3라운드 입력창을 여기에 생성합니다 -->
+                    </div>
                 </div>
             </div>
         </div>
 
+        <!-- 캡처 대상 컨테이너 -->
         <div class="score-table-container">
-            
             <div class="button-wrapper">
-                <button id="calculate-score-button">
-                    🏆 점수 계산 및 순위 정렬
-                </button>
-                <button id="save-score-image-button">
-                    🖼️ 이미지 저장
-                </button>
-                <button id="reset-scores-button">
-                    🚨 점수 초기화
-                </button>
+                <button id="calculate-score-button">🏆 점수 계산 및 순위 정렬</button>
+                <button id="save-score-image-button">🖼️ 이미지 저장</button>
+                <button id="reset-scores-button">🚨 점수 초기화</button>
             </div>
             
             <table id="score-table">
@@ -55,18 +53,17 @@
                         <th>1라운드</th>
                         <th>2라운드</th>
                         <th>3라운드</th>
-                        <th>4라운드</th>
-                        <th>5라운드</th>
-                        <th>6라운드</th>
                         <th>최종 점수</th>
                         <th>체크포인트</th>
                     </tr>
                 </thead>
                 <tbody id="score-table-body">
-                    </tbody>
+                    <!-- 팀 데이터가 여기에 로드됩니다 -->
+                </tbody>
             </table>
         </div>
-        </div>
+
+    </div>
     
     <script src="score.js"></script>
 </body>
