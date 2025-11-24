@@ -155,20 +155,24 @@ function calculateAndRenderRanking(history) {
 
     history.forEach(record => {
         if (!record.members) return;
+        
+        // 1. 쉼표로 쪼개고 공백 제거하여 '정확한 이름'들의 배열을 만듦
         const members = record.members.split(',').map(m => m.trim());
-
+        
         members.forEach(player => {
-            if (player) winCounts[player] = (winCounts[player] || 0) + 1;
+            if (player) {
+                // 2. 정확히 일치하는 이름에만 카운트 (잭 != 캡틴잭)
+                winCounts[player] = (winCounts[player] || 0) + 1;
+            }
         });
     });
 
-    // ★ 여기가 문제였습니다! const를 let으로 바꿨습니다.
+    // (이하 정렬 및 렌더링 코드는 기존과 동일)
     let rankingList = Object.entries(winCounts)
         .map(([name, count]) => ({ name, count }))
         .sort((a, b) => b.count - a.count);
 
-    // 이제 재할당이 가능합니다.
-    rankingList = rankingList.slice(0, 10);
+    rankingList = rankingList.slice(0, 10); 
 
     const tbody = document.getElementById('playerRankingBody');
     if (!tbody) return;
