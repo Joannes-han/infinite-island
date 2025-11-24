@@ -1,0 +1,137 @@
+/* assets/css/fame.css */
+
+.fame-layout {
+    display: flex; gap: 30px; height: calc(100vh - 80px); overflow: hidden; padding-bottom: 0 !important;
+}
+
+.board-title {
+    font-size: 18px; margin-bottom: 20px; color: var(--accent-gold);
+    border-left: 4px solid var(--accent-gold); padding-left: 10px;
+}
+
+/* === 왼쪽 히스토리 섹션 === */
+.section-history { flex: 1; overflow-y: auto; padding-right: 10px; }
+
+.history-card {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    border-left: 5px solid var(--accent-gold);
+    border-radius: 8px; padding: 20px; margin-bottom: 15px;
+    display: flex; justify-content: space-between; align-items: center; 
+    transition: transform 0.2s;
+    cursor: pointer;
+    
+    /* 상세 보기 레이아웃 변경을 위해 */
+    flex-direction: column; 
+    align-items: stretch; 
+    gap: 0;
+}
+
+.history-card:hover { 
+    transform: translateX(5px); 
+    border-color: var(--text-muted); 
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
+}
+
+/* 요약 정보 (항상 보임) */
+.history-summary {
+    display: flex; justify-content: space-between; align-items: center;
+}
+
+.history-date { font-size: 12px; color: var(--text-muted); margin-bottom: 5px; }
+.history-team { font-size: 18px; font-weight: bold; color: var(--text-main); margin-bottom: 5px; }
+.history-members { color: var(--text-muted); font-size: 14px; }
+.history-members i { color: var(--accent-gold); margin-right: 5px; }
+
+.history-score { font-size: 24px; font-weight: 800; color: var(--accent-gold); }
+.history-score span { font-size: 12px; color: var(--text-muted); font-weight: normal; }
+
+
+/* === 상세 정보 (아코디언) === */
+.details-box {
+    max-height: 0; overflow: hidden;
+    transition: max-height 0.3s ease-out, margin-top 0.3s ease;
+    
+    /* ★ 수정: 배경색을 테마 변수로 변경 */
+    background-color: var(--bg-details); 
+    border-radius: 4px; margin-top: 0;
+}
+
+/* 활성화 시 스타일 */
+.history-card.active {
+    border-color: var(--accent-gold);
+    background: var(--bg-hover); /* 활성화된 카드 배경 */
+}
+.history-card.active .details-box {
+    max-height: 500px; 
+    margin-top: 15px; padding: 10px;
+    border-top: 1px dashed var(--border-color);
+}
+
+/* 미니 테이블 디자인 */
+.mini-table { width: 100%; font-size: 12px; border-collapse: collapse; }
+.mini-table th { 
+    text-align: left; 
+    color: var(--text-muted); /* 변수 적용 */
+    padding: 5px; 
+    border-bottom: 1px solid var(--border-color); 
+}
+.mini-table td { 
+    padding: 6px 5px; 
+    color: var(--text-main); /* 변수 적용 (이제 흰색 배경에선 검은 글씨 나옴) */
+    border-bottom: 1px solid var(--border-color); 
+}
+.mini-table tr:last-child td { border-bottom: none; }
+
+.mini-rank { width: 30px; font-weight: bold; color: var(--accent-gold); }
+.mini-score { 
+    text-align: right; font-weight: bold; 
+    color: var(--text-main); /* 변수 적용 */
+}
+
+
+/* === 오른쪽 랭킹 섹션 === */
+.section-ranking {
+    width: 400px; background-color: var(--bg-panel);
+    border-left: 1px solid var(--border-color); padding: 20px;
+    display: flex; flex-direction: column;
+}
+
+.ranking-table-wrapper { flex: 1; overflow-y: auto; }
+
+.fame-table { width: 100%; border-collapse: collapse; }
+.fame-table th { text-align: left; color: var(--text-muted); padding: 10px; border-bottom: 1px solid var(--border-color); font-size: 13px; }
+.fame-table td { padding: 12px 10px; border-bottom: 1px solid var(--border-color); color: var(--text-main); }
+
+.rank-badge {
+    display: inline-block; width: 24px; height: 24px; text-align: center; line-height: 24px;
+    border-radius: 50%; font-weight: bold; font-size: 12px; color: #000;
+}
+.rank-1 .rank-badge { background-color: #ffd700; }
+.rank-2 .rank-badge { background-color: #c0c0c0; }
+.rank-3 .rank-badge { background-color: #cd7f32; }
+.rank-other .rank-badge { background-color: var(--bg-hover); color: var(--text-muted); }
+
+.win-count { font-weight: bold; color: var(--accent-gold); }
+
+/* 페이지네이션 */
+.pagination-controls { display: flex; justify-content: center; align-items: center; gap: 20px; padding-top: 20px; margin-bottom: 20px; }
+.btn-page {
+    background-color: var(--bg-panel); border: 1px solid var(--border-color); color: var(--text-main);
+    padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold;
+    display: flex; align-items: center; gap: 8px; transition: 0.2s;
+}
+.btn-page:hover { background-color: var(--bg-hover); color: var(--accent-gold); border-color: var(--accent-gold); }
+.btn-page:disabled { opacity: 0.5; cursor: not-allowed; }
+#pageIndicator { font-size: 14px; color: var(--text-muted); font-weight: bold; }
+
+/* 스크롤바 */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-main); }
+::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* 상세 정보 박스 안에서는 기본 커서로 변경 (클릭 안 됨을 시각적으로 표현) */
+.details-box {
+    cursor: default; 
+}

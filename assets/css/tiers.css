@@ -1,0 +1,86 @@
+/* assets/css/tiers.css */
+
+.btn-save {
+    background-color: var(--accent-gold); color: black; border: none;
+    padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer;
+    box-shadow: 0 0 10px var(--accent-gold-dim);
+}
+
+.tier-board { display: flex; flex-direction: column; gap: 10px; margin-bottom: 40px; }
+
+.tier-row {
+    display: flex; background-color: var(--bg-panel);
+    border: 1px solid var(--border-color); border-radius: 4px; overflow: hidden; min-height: 70px;
+}
+
+.tier-header {
+    width: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 20px; color: rgba(0,0,0,0.6);
+    text-shadow: 1px 1px 0 rgba(255,255,255,0.2); flex-shrink: 0;
+}
+.cost-badge { font-size: 12px; background-color: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 10px; margin-top: 4px; }
+
+.tier-header.sss { background-color: var(--tier-sss); }
+.tier-header.ss { background-color: var(--tier-ss); }
+.tier-header.s { background-color: var(--tier-s); }
+.tier-header.a { background-color: var(--tier-a); }
+.tier-header.b { background-color: var(--tier-b); }
+.tier-header.c { background-color: var(--tier-c); }
+.tier-header.d { background-color: var(--tier-d); }
+.tier-header.f { background-color: var(--tier-f); }
+
+.tier-body {
+    flex-grow: 1; padding: 10px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+}
+.tier-body.drag-over { background-color: var(--accent-gold-dim); }
+
+/* 선수 카드 */
+.player-card {
+    background-color: var(--bg-hover); border: 1px solid var(--border-color);
+    padding: 8px 16px; border-radius: 4px; font-size: 14px; font-weight: 600;
+    cursor: grab; user-select: none; color: var(--text-main);
+}
+.player-card:hover { border-color: var(--accent-gold); color: var(--accent-gold); }
+.player-card:active { cursor: grabbing; }
+
+/* 하단 관리 영역 */
+.player-management-area { display: flex; gap: 20px; align-items: stretch; margin-bottom: 50px; }
+
+.add-player-box {
+    width: 320px; background-color: var(--bg-panel);
+    border: 1px solid var(--border-color); padding: 20px; border-radius: 8px;
+    display: flex; flex-direction: column; justify-content: center;
+}
+.add-player-box h3 { margin-bottom: 15px; color: var(--accent-gold); font-size: 16px; }
+
+.input-group { display: flex; gap: 5px; }
+.input-group input {
+    flex: 1; padding: 10px; background-color: var(--bg-input);
+    border: 1px solid var(--border-color); color: var(--text-main); border-radius: 4px;
+}
+.btn-add {
+    background-color: var(--border-color); color: var(--text-main); border: none;
+    padding: 0 15px; cursor: pointer; border-radius: 4px; font-weight: bold;
+}
+.btn-add:hover { background-color: var(--accent-gold); color: black; }
+
+.delete-box {
+    width: 200px; height: auto; background-color: var(--bg-hover);
+    border: 2px dashed var(--border-color); border-radius: 8px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 8px; color: var(--text-muted); font-weight: bold; font-size: 13px; transition: all 0.2s;
+}
+.delete-box.drag-over { border-color: #ff4757; background-color: rgba(255, 71, 87, 0.1); color: #ff4757; }
+
+.unassigned-box {
+    flex: 1; background-color: var(--bg-panel);
+    border: 1px solid var(--border-color); border-radius: 8px; padding: 20px;
+    display: flex; flex-direction: column;
+}
+.unassigned-box h3 { margin-bottom: 10px; color: var(--text-muted); font-size: 14px; }
+
+/* 스크롤바 */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-main); }
+::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
