@@ -150,13 +150,23 @@ function calculateStats(playerName, historyData) {
 
     historyData.forEach(record => {
         if (!record.match_detail) return;
-        const myRecord = record.match_detail.find(team => 
-            team.members && team.members.includes(playerName)
-        );
+        
+        // ★ 핵심 수정: 문자열 포함(includes)이 아니라, 배열로 쪼개서 정확히 일치하는지 확인
+        const myRecord = record.match_detail.find(team => {
+            if (!team.members) return false;
+            
+            // "잭, 캡틴잭, 김뿡" -> ["잭", "캡틴잭", "김뿡"]
+            const memberList = team.members.split(',').map(m => m.trim());
+            
+            // 배열 안에 '잭'이 정확히 있는지 확인 (캡틴잭은 무시됨)
+            return memberList.includes(playerName);
+        });
 
         if (myRecord) {
             totalGames++;
+            
             let rank = 99;
+            // 순위 파싱 로직 (기존 유지)
             if (myRecord.id.includes('위')) rank = parseInt(myRecord.id.replace('위', ''));
             else if (myRecord.id.includes('우승') || myRecord.id.includes('1등')) rank = 1;
 
