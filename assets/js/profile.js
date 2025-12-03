@@ -149,28 +149,36 @@ function calculateStats(playerName, historyData) {
     const matches = [];
 
     historyData.forEach(record => {
-        if (!record.match_detail) return;
+        if (!record.match_detail || !Array.isArray(record.match_detail)) return;
         
-        // ★ 핵심 수정: 문자열 포함(includes)이 아니라, 배열로 쪼개서 정확히 일치하는지 확인
-        const myRecord = record.match_detail.find(team => {
+        // ★ 수정됨: findIndex를 사용하여 '몇 번째'에 있는지 찾음 (0번 = 1등)
+        const myIndex = record.match_detail.findIndex(team => {
             if (!team.members) return false;
-            
-            // "잭, 캡틴잭, 김뿡" -> ["잭", "캡틴잭", "김뿡"]
             const memberList = team.members.split(',').map(m => m.trim());
-            
-            // 배열 안에 '잭'이 정확히 있는지 확인 (캡틴잭은 무시됨)
             return memberList.includes(playerName);
         });
 
-        if (myRecord) {
+        // 선수를 찾았다면 (myIndex가 -1이 아님)
+        if (myIndex !== -1) {
             totalGames++;
             
-            let rank = 99;
-            // 순위 파싱 로직 (기존 유지)
-            if (myRecord.id.includes('위')) rank = parseInt(myRecord.id.replace('위', ''));
-            else if (myRecord.id.includes('우승') || myRecord.id.includes('1등')) rank = 1;
+            // ★ 핵심: 배열 순서(index)가 곧 순위임 (0번째 -> 1위)
+            // 단, 공동 순위 로직이 필요할 수 있으나, 일단 심플하게 순서대로 처리
+            // (자유 내전의 경우 '공동 우승' 그룹이 0번째에 있으므로 1위로 처리됨)
+            let rank = myIndex + 1; 
 
+            // 예외 처리: 만약 id에 "우승"이라는 텍스트가 명시되어 있다면 무조건 1위로 간주
+            // (자유 내전 등 특수 케이스 호환성 유지)
+            const myRecord = record.match_detail[myIndex];
+            const idText = (myRecord.id || '').toString();
+            if (idText.includes('우승') || idText.includes('1등')) {
+                rank = 1;
+            }
+
+            // 통계 집계
             if (rank === 1) totalWins++;
+            
+            // 평균 순위 계산 (99위 이상은 제외)
             if (rank < 99) {
                 rankSum += rank;
                 rankCount++;
@@ -181,7 +189,7 @@ function calculateStats(playerName, historyData) {
                 title: record.team_name,
                 members: myRecord.members,
                 rank: rank,
-                rankText: myRecord.id
+                rankText: idText // 화면 표시용 텍스트 (예: "Team 1" or "1위")
             });
         }
     });
@@ -270,3 +278,4 @@ function openModal(player) {
 function closeModal() {
     document.getElementById('profileModal').classList.remove('active');
 }
+
