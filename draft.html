@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>팀 드래프트 - 무한섬 Manager</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/theme.css">
+    <link rel="stylesheet" href="assets/css/draft.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="shortcut icon" href="#">
+
+    <script type="module" src="assets/js/auth.js"></script>
+</head>
+
+<body>
+    <script>
+        (function () {
+            // 로컬 스토리지에서 테마를 가져옴
+            const savedTheme = localStorage.getItem('infinite_theme') || 'dark';
+            // 화면이 그려지기 전에 body에 클래스를 미리 붙여버림
+            document.body.classList.add(savedTheme + '-mode');
+        })();
+    </script>
+    <div class="app-container">
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h1 class="brand-logo"><i class="fa-solid fa-infinity"></i> 무한섬</h1>
+            </div>
+
+            <ul class="menu-list">
+                <li><a href="index.html" class="menu-item"><i class="fa-solid fa-house"></i> 대시보드</a></li>
+                <li><a href="attendance.html" class="menu-item"><i class="fa-solid fa-clipboard-check"></i> 출/퇴근 관리</a>
+                </li>
+                <li><a href="draft.html" class="menu-item active"><i class="fa-solid fa-people-group"></i> 팀 드래프트</a>
+                </li>
+                <li><a href="score.html" class="menu-item"><i class="fa-solid fa-trophy"></i> 경기 점수판</a></li>
+                <li><a href="hall_of_fame.html" class="menu-item"><i class="fa-solid fa-crown"></i> 명예의 전당</a></li>
+                <li><a href="profile.html" class="menu-item"><i class="fa-solid fa-user-tag"></i> 전적 검색</a></li>
+                <li><a href="tiers.html" class="menu-item"><i class="fa-solid fa-ranking-star"></i> 선수 티어표</a></li>
+            </ul>
+
+            <div style="margin-top: auto; padding-top: 20px; border-top: 1px solid #333;">
+                <a href="#" id="themeToggleBtn" class="menu-item">
+                    <i class="fa-solid fa-moon"></i> 다크 모드
+                </a>
+                <a href="#" id="logoutBtn" class="menu-item" style="color: #ff4757;">
+                    <i class="fa-solid fa-right-from-bracket"></i> 로그아웃
+                </a>
+            </div>
+
+            <div class="sidebar-footer">
+                <p>Designed for Eternal Return</p>
+            </div>
+        </nav>
+
+        <main class="content-area">
+            <header class="top-bar">
+                <h2 class="page-title">팀 드래프트</h2>
+                <div class="draft-controls">
+                    <div class="draft-controls">
+                        <div class="divider" style="width:1px; height:20px; background:#444; margin:0 5px;"></div>
+
+                        <button id="autoDraftBtn" class="btn-control btn-magic"
+                            style="background-color: #8e44ad; border-color: #9b59b6;">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> 자동 배정
+                        </button>
+
+                    </div>
+                    <div class="team-control-group">
+
+                        <button id="addTeamBtn" class="btn-control btn-add-team" title="팀 추가">
+                            <i class="fa-solid fa-plus"></i> 팀 추가
+                        </button>
+                        <button id="removeTeamBtn" class="btn-control btn-remove-team" title="마지막 팀 삭제">
+                            <i class="fa-solid fa-minus"></i> 팀 제거
+                        </button>
+                    </div>
+                    <button id="copyTextBtn" class="btn-control btn-copy">
+                        <i class="fa-regular fa-copy"></i> 텍스트 복사
+                    </button>
+                    <button id="resetTeamsBtn" class="btn-control btn-reset">
+                        <i class="fa-solid fa-rotate-left"></i> 초기화
+                    </button>
+                </div>
+            </header>
+
+            <div class="page-content-container draft-layout">
+                <div class="teams-section">
+                    <div id="teams-container" class="teams-grid">
+                    </div>
+                </div>
+
+                <div class="pool-section">
+                    <div class="section-header">
+                        <h3>대기 선수 (<span id="poolCount">0</span>명)</h3>
+                    </div>
+
+                    <div id="pool-tiers-container" class="pool-tiers-scroll">
+                        <div class="tier-group-box" data-tier="SSS">
+                            <div class="tier-header sss">SSS (8코스트)</div>
+                            <div class="tier-body-pool" id="pool-sss"></div>
+                        </div>
+                        <div class="tier-group-box" data-tier="SS">
+                            <div class="tier-header ss">SS (7코스트)</div>
+                            <div class="tier-body-pool" id="pool-ss"></div>
+                        </div>
+                        <div class="tier-group-box" data-tier="S">
+                            <div class="tier-header s">S (6코스트)</div>
+                            <div class="tier-body-pool" id="pool-s"></div>
+                        </div>
+                        <div class="tier-group-box" data-tier="A">
+                            <div class="tier-header a">A (5코스트)</div>
+                            <div class="tier-body-pool" id="pool-a"></div>
+                        </div>
+                        <div class="tier-group-box" data-tier="B">
+                            <div class="tier-header b">B (4코스트)</div>
+                            <div class="tier-body-pool" id="pool-b"></div>
+                        </div>
+                        <div class="tier-group-box" data-tier="C">
+                            <div class="tier-header c">C (3코스트)</div>
+                            <div class="tier-body-pool" id="pool-c"></div>
+                        </div>
+                        <div class="tier-group-box" data-tier="D">
+                            <div class="tier-header d">D (2코스트)</div>
+                            <div class="tier-body-pool" id="pool-d"></div>
+                        </div>
+                        <div class="tier-group-box" data-tier="F">
+                            <div class="tier-header f">F (1코스트)</div>
+                            <div class="tier-body-pool" id="pool-f"></div>
+                        </div>
+                        <div class="tier-group-box" data-tier="Unranked">
+                            <div class="tier-header unranked">Unranked (0코스트)</div>
+                            <div class="tier-body-pool" id="pool-unranked"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script type="module" src="assets/js/draft.js"></script>
+    <script type="module" src="assets/js/theme.js"></script>
+</body>
+
+</html>

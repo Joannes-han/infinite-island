@@ -1,0 +1,90 @@
+/* assets/css/score.css */
+
+.score-split-view { display: flex; gap: 20px; height: calc(100vh - 150px); overflow: hidden; }
+.board-title { margin: 0 0 15px 0; font-size: 16px; color: var(--text-main); border-left: 4px solid var(--accent-gold); padding-left: 10px; }
+
+.table-scroll-wrapper {
+    flex: 1; overflow: auto; height: calc(100% - 40px);
+    background-color: var(--bg-panel);
+    border: 1px solid var(--border-color); border-radius: 8px;
+}
+
+/* 테이블 공통 */
+.score-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+.score-table th, .score-table td {
+    padding: 12px 10px; text-align: center;
+    border-bottom: 1px solid var(--border-color);
+    border-right: 1px solid var(--border-color);
+    color: var(--text-main);
+}
+.score-table th {
+    background-color: var(--bg-hover);
+    font-weight: bold; color: var(--text-muted);
+    position: sticky; top: 0; z-index: 10;
+}
+
+/* 순위표 */
+.section-leaderboard { width: 380px; flex-shrink: 0; display: flex; flex-direction: column; }
+.leaderboard-table .col-rank { width: 50px; font-size: 18px; font-weight: 800; }
+.leaderboard-table .col-team { text-align: left; }
+.leaderboard-table .col-total { font-size: 20px; color: var(--accent-gold); font-weight: bold; background-color: var(--accent-gold-dim); }
+
+.rank-row-1 { background-color: rgba(255, 215, 0, 0.1); }
+.rank-row-1 .col-rank { color: #ffd700; text-shadow: 0 0 10px rgba(255, 215, 0, 0.3); }
+.rank-row-2 { background-color: rgba(192, 192, 192, 0.05); }
+.rank-row-2 .col-rank { color: #c0c0c0; }
+.rank-row-3 { background-color: rgba(205, 127, 50, 0.05); }
+.rank-row-3 .col-rank { color: #cd7f32; }
+
+.team-members-small { display: block; font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+/* 입력판 */
+.section-input { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.col-fixed-team { position: sticky; left: 0; z-index: 20; background-color: var(--bg-hover); border-right: 2px solid var(--border-color); text-align: left; }
+.input-table td:first-child { position: sticky; left: 0; z-index: 15; background-color: var(--bg-panel); border-right: 2px solid var(--border-color); font-weight: bold; text-align: left; }
+.col-total-preview { width: 80px; color: var(--text-muted); font-weight: bold; background-color: var(--bg-hover); }
+
+/* 입력창 */
+.score-input {
+    width: 60px; background: var(--bg-input);
+    border: 1px solid var(--border-color); color: var(--text-main);
+    padding: 8px; text-align: center; border-radius: 4px;
+}
+.score-input:focus { border-color: var(--accent-gold); outline: none; }
+input[type=number]::-webkit-outer-spin-button, input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+input[type=number] { -moz-appearance: textfield; }
+
+/* 체크포인트 */
+.checkpoint-reached .col-check i { color: #ff4757; font-size: 18px; animation: pulse 1.5s infinite; }
+.checkpoint-reached td { background-color: rgba(255, 71, 87, 0.05); }
+@keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.2); opacity: 0.7; } 100% { transform: scale(1); opacity: 1; } }
+
+/* 컨트롤 */
+.score-controls { display: flex; align-items: center; gap: 15px; }
+.divider { width: 1px; height: 20px; background: var(--border-color); margin: 0 5px; }
+.btn-control {
+    border: 1px solid var(--border-color); padding: 8px 14px; border-radius: 6px;
+    cursor: pointer; font-weight: 600; font-size: 13px;
+    display: flex; align-items: center; gap: 8px; color: white; transition: 0.2s;
+}
+.btn-blue { background-color: #2980b9; }
+.btn-gray { background-color: #2c3e50; }
+.btn-red { background-color: #c0392b; }
+.btn-gold { background-color: #eebc51; color: black; border: none; }
+
+/* 토글 */
+.checkpoint-group { display: flex; align-items: center; gap: 10px; background: var(--bg-hover); padding: 5px 15px; border-radius: 20px; border: 1px solid var(--border-color); }
+.toggle-switch { position: relative; display: inline-block; width: 34px; height: 20px; }
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #555; transition: .4s; border-radius: 34px; }
+.slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+input:checked + .slider { background-color: #ff4757; }
+input:checked + .slider:before { transform: translateX(14px); }
+.label-text { font-size: 14px; font-weight: bold; color: var(--text-muted); }
+#checkpointTarget { width: 60px; background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-main); padding: 5px; text-align: center; border-radius: 4px; font-weight: bold; }
+
+/* 스크롤바 */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-main); }
+::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }

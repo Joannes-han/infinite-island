@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>선수 전적 - 무한섬 Manager</title>
+    <link rel="shortcut icon" href="#">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/theme.css">
+    <link rel="stylesheet" href="assets/css/profile.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+    <div class="app-container">
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h1 class="brand-logo"><i class="fa-solid fa-infinity"></i> 무한섬</h1>
+            </div>
+            <ul class="menu-list">
+                <li><a href="index.html" class="menu-item"><i class="fa-solid fa-house"></i> 대시보드</a></li>
+                <li><a href="attendance.html" class="menu-item"><i class="fa-solid fa-clipboard-check"></i> 출/퇴근 관리</a>
+                </li>
+                <li><a href="draft.html" class="menu-item"><i class="fa-solid fa-people-group"></i> 팀 드래프트</a></li>
+                <li><a href="score.html" class="menu-item"><i class="fa-solid fa-trophy"></i> 경기 점수판</a></li>
+                <li><a href="hall_of_fame.html" class="menu-item"><i class="fa-solid fa-crown"></i> 명예의 전당</a></li>
+                <li><a href="profile.html" class="menu-item active"><i class="fa-solid fa-user-tag"></i> 전적 검색</a></li>
+                <li><a href="tiers.html" class="menu-item"><i class="fa-solid fa-ranking-star"></i> 선수 티어표</a></li>
+            </ul>
+
+            <div style="margin-top: auto; padding-top: 20px; border-top: 1px solid #333;">
+                <a href="#" id="themeToggleBtn" class="menu-item"><i class="fa-solid fa-moon"></i> 다크 모드</a>
+                <a href="#" id="logoutBtn" class="menu-item" style="color: #ff4757;"><i
+                        class="fa-solid fa-right-from-bracket"></i> 로그아웃</a>
+            </div>
+            <div class="sidebar-footer">
+                <p>Designed for Eternal Return</p>
+            </div>
+        </nav>
+
+        <main class="content-area">
+            <header class="top-bar">
+                <h2 class="page-title">전체 선수 전적 (Leaderboard)</h2>
+                <div class="search-wrapper-small">
+                    <i class="fa-solid fa-search"></i>
+                    <input type="text" id="tableSearch" placeholder="이름으로 필터링...">
+                </div>
+            </header>
+
+            <div class="page-content-container">
+                <div class="table-scroll-wrapper">
+                    <table class="profile-table">
+                        <thead>
+                            <tr>
+                                <th class="sortable" data-key="name">
+                                    선수 <i class="fa-solid fa-sort sort-icon"></i>
+                                </th>
+                                <th class="sortable" data-key="tier">
+                                    티어 <i class="fa-solid fa-sort sort-icon"></i>
+                                </th>
+                                <th class="sortable" data-key="totalGames">
+                                    총 게임 <i class="fa-solid fa-sort sort-icon"></i>
+                                </th>
+                                <th class="sortable" data-key="totalWins">
+                                    우승 <i class="fa-solid fa-sort sort-icon"></i>
+                                </th>
+                                <th class="sortable" data-key="winRate">
+                                    승률 <i class="fa-solid fa-sort sort-icon"></i>
+                                </th>
+                                <th class="sortable" data-key="avgRank">
+                                    평균 순위 <i class="fa-solid fa-sort sort-icon"></i>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="playerTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="profileModal" class="modal-overlay">
+        <div class="modal-content">
+            <button id="closeModalBtn" class="close-btn"><i class="fa-solid fa-xmark"></i></button>
+
+            <div id="modalBody" class="profile-detail-view">
+                <div class="profile-header-card">
+                    <div class="profile-img-large" id="pImg"><i class="fa-solid fa-user"></i></div>
+                    <div class="profile-info">
+                        <div class="profile-name-row">
+                            <h1 id="pName">선수 이름</h1>
+                            <span class="tier-badge" id="pTier">Tier</span>
+                        </div>
+                        <div class="profile-meta"><span id="pCost">0코스트</span></div>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-label">총 게임</div>
+                        <div class="stat-value" id="statTotal">0</div>
+                    </div>
+                    <div class="stat-box win-box">
+                        <div class="stat-label">우승</div>
+                        <div class="stat-value" id="statWins">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">승률</div>
+                        <div class="stat-value" id="statWinRate">0%</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">평균 순위</div>
+                        <div class="stat-value" id="statAvgRank">-</div>
+                    </div>
+                </div>
+
+                <h3 class="section-title"><i class="fa-solid fa-clock-rotate-left"></i> 최근 경기 기록</h3>
+                <div class="match-history-list" id="matchHistoryList">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            const savedTheme = localStorage.getItem('infinite_theme') || 'dark';
+            document.body.classList.add(savedTheme + '-mode');
+        })();
+    </script>
+    <script type="module" src="assets/js/theme.js"></script>
+    <script type="module" src="assets/js/auth.js"></script>
+    <script type="module" src="assets/js/profile.js"></script>
+</body>
+
+</html>

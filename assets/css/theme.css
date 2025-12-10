@@ -1,0 +1,70 @@
+/* assets/css/theme.css */
+
+:root {
+    /* === 🌙 기본 다크 모드 (Dark) === */
+    --bg-main: #050505;
+    --bg-panel: #111111;
+    --bg-hover: #1a1a1a;
+    --bg-input: #000000;
+    
+    /* ★ 추가된 변수: 상세 정보 박스 배경 */
+    --bg-details: #080808; 
+
+    --text-main: #e0e0e0;
+    --text-muted: #7e7e7e;
+    
+    --border-color: #333333;
+    
+    --accent-gold: #eebc51;
+    --accent-gold-dim: rgba(238, 188, 81, 0.1);
+
+    /* 티어 색상 (고정) */
+    --tier-sss: #ff4757;
+    --tier-ss: #ffa502;
+    --tier-s: #eccc68;
+    --tier-a: #7bed9f;
+    --tier-b: #2ed573;
+    --tier-c: #1e90ff;
+    --tier-d: #3742fa;
+    --tier-f: #a4b0be;
+
+    --sidebar-width: 260px;
+}
+
+/* === ☀️ 화이트 모드 (Light) === */
+body.light-mode {
+    --bg-main: #f0f2f5;
+    --bg-panel: #ffffff;
+    --bg-hover: #f8f9fa;
+    --bg-input: #ffffff;
+    
+    /* ★ 화이트 모드용 상세 배경 (약간 어두운 회색) */
+    --bg-details: #f1f2f6; 
+
+    --text-main: #1c1e21;
+    --text-muted: #65676b;
+    
+    --border-color: #e4e6eb;
+    
+    --accent-gold: #d35400;
+    --accent-gold-dim: rgba(211, 84, 0, 0.1);
+}
+
+/* === ☕ 베이지 모드 (Beige) === */
+body.beige-mode {
+    --bg-main: #f5f1e6;
+    --bg-panel: #fffdf5;
+    --bg-hover: #e8e4d9;
+    --bg-input: #fffdf5;
+    
+    /* ★ 베이지 모드용 상세 배경 (진한 베이지) */
+    --bg-details: #efeadd; 
+
+    --text-main: #4a4036;
+    --text-muted: #8c8379;
+    
+    --border-color: #dcd3c5;
+    
+    --accent-gold: #b08d55;
+    --accent-gold-dim: rgba(176, 141, 85, 0.1);
+}

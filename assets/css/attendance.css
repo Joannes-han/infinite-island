@@ -1,0 +1,63 @@
+/* assets/css/attendance.css */
+
+.status-summary { display: flex; gap: 15px; }
+.badge-total { color: #70a1ff; border: 1px solid #70a1ff; padding: 4px 12px; border-radius: 20px; font-weight: bold; }
+.badge-present { color: #2ed573; border: 1px solid #2ed573; padding: 4px 12px; border-radius: 20px; font-weight: bold;}
+.badge-absent { color: #ff4757; border: 1px solid #ff4757; padding: 4px 12px; border-radius: 20px; font-weight: bold;}
+
+.attendance-split-view { display: flex; gap: 20px; height: calc(100vh - 150px); }
+
+.split-column {
+    flex: 1; background-color: var(--bg-panel);
+    border: 1px solid var(--border-color); border-radius: 12px;
+    display: flex; flex-direction: column; overflow: hidden;
+}
+
+.present-zone { border-top: 4px solid #2ed573; }
+.absent-zone { border-top: 4px solid #ff4757; }
+
+.zone-header {
+    padding: 20px; background-color: var(--bg-hover);
+    border-bottom: 1px solid var(--border-color); text-align: center;
+}
+.zone-header h3 { margin: 0; font-size: 18px; color: var(--text-main); }
+
+.player-stack {
+    padding: 20px; overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column; gap: 15px;
+}
+.player-stack::-webkit-scrollbar { display: none; }
+
+.tier-group-small {
+    margin-bottom: 16px; padding: 20px;
+    background-color: var(--bg-hover);
+    border-radius: 8px; border: 1px solid var(--border-color);
+}
+
+.tier-label {
+    font-size: 15px; font-weight: 800; margin-bottom: 15px;
+    padding-left: 10px; border-left: 4px solid #555; line-height: 1.2;
+    color: var(--text-muted);
+}
+
+.player-chips-area { display: flex; flex-wrap: wrap; gap: 10px; padding-left: 4px; }
+
+/* 선수 칩 */
+.player-chip {
+    padding: 8px 12px; border-radius: 4px; font-size: 14px; font-weight: 500;
+    cursor: pointer; transition: all 0.2s;
+    border: 1px solid var(--border-color); background-color: var(--bg-main); color: var(--text-main);
+    display: flex; align-items: center; justify-content: flex-start; gap: 8px;
+}
+
+.status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: #555; flex-shrink: 0; }
+.tier-suffix { font-size: 12px; color: var(--text-muted); margin-left: auto; }
+
+/* 출석존 스타일 */
+.present-zone .player-chip { border-color: #2ed573; }
+.present-zone .player-chip .status-dot { background-color: #2ed573; box-shadow: 0 0 6px #2ed573; }
+.present-zone .player-chip:hover { background-color: var(--bg-hover); border-color: #55efc4; }
+
+/* 퇴근존 스타일 */
+.absent-zone .player-chip { border-color: #ff4757; }
+.absent-zone .player-chip .status-dot { background-color: #ff4757; box-shadow: 0 0 6px #ff4757; }
+.absent-zone .player-chip:hover { background-color: var(--bg-hover); border-color: #ff6b81; }

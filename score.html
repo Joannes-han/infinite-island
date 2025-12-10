@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>경기 점수판 - 무한섬 Manager</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/theme.css">
+    <link rel="stylesheet" href="assets/css/score.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script type="module" src="assets/js/auth.js"></script>
+</head>
+
+<body>
+    <script>
+        (function () {
+            // 로컬 스토리지에서 테마를 가져옴
+            const savedTheme = localStorage.getItem('infinite_theme') || 'dark';
+            // 화면이 그려지기 전에 body에 클래스를 미리 붙여버림
+            document.body.classList.add(savedTheme + '-mode');
+        })();
+    </script>
+    <div class="app-container">
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h1 class="brand-logo"><i class="fa-solid fa-infinity"></i> 무한섬</h1>
+            </div>
+
+            <ul class="menu-list">
+                <li><a href="index.html" class="menu-item"><i class="fa-solid fa-house"></i> 대시보드</a></li>
+                <li><a href="attendance.html" class="menu-item"><i class="fa-solid fa-clipboard-check"></i> 출/퇴근 관리</a>
+                </li>
+                <li><a href="draft.html" class="menu-item"><i class="fa-solid fa-people-group"></i> 팀 드래프트</a></li>
+                <li><a href="score.html" class="menu-item active"><i class="fa-solid fa-trophy"></i> 경기 점수판</a></li>
+                <li><a href="hall_of_fame.html" class="menu-item"><i class="fa-solid fa-crown"></i> 명예의 전당</a></li>
+                <li><a href="profile.html" class="menu-item"><i class="fa-solid fa-user-tag"></i> 전적 검색</a></li>
+                <li><a href="tiers.html" class="menu-item"><i class="fa-solid fa-ranking-star"></i> 선수 티어표</a></li>
+            </ul>
+
+            <div style="margin-top: auto; padding-top: 20px; border-top: 1px solid #333;">
+                <a href="#" id="themeToggleBtn" class="menu-item">
+                    <i class="fa-solid fa-moon"></i> 다크 모드
+                </a>
+                <a href="#" id="logoutBtn" class="menu-item" style="color: #ff4757;">
+                    <i class="fa-solid fa-right-from-bracket"></i> 로그아웃
+                </a>
+            </div>
+
+            <div class="sidebar-footer">
+                <p>Designed for Eternal Return</p>
+            </div>
+        </nav>
+
+        <main class="content-area">
+            <header class="top-bar">
+                <h2 class="page-title">경기 점수 & 순위</h2>
+
+                <div class="score-controls">
+                    <div class="control-group checkpoint-group">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="checkpointToggle">
+                            <span class="slider"></span>
+                        </label>
+                        <span class="label-text">체크포인트 룰</span>
+                        <input type="number" id="checkpointTarget" value="50" disabled placeholder="점수">
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <button id="addRoundBtn" class="btn-control btn-blue">
+                        <i class="fa-solid fa-plus"></i> 라운드 추가
+                    </button>
+                    <button id="refreshBtn" class="btn-control btn-gray">
+                        <i class="fa-solid fa-rotate"></i> 새로고침
+                    </button>
+                    <button id="resetMatchBtn" class="btn-control btn-red">
+                        <i class="fa-solid fa-eraser"></i> 점수 초기화
+                    </button>
+
+                    <button id="finalizeBtn" class="btn-control btn-gold"
+                        style="background-color: #eebc51; color: black; border:none;">
+                        <i class="fa-solid fa-crown"></i> 대회 종료 & 저장
+                    </button>
+                </div>
+            </header>
+
+            <div class="page-content-container">
+                <div class="score-split-view">
+
+                    <div class="section-leaderboard">
+                        <h3 class="board-title"><i class="fa-solid fa-trophy"></i> 실시간 순위</h3>
+                        <div class="table-scroll-wrapper">
+                            <table class="score-table leaderboard-table">
+                                <thead>
+                                    <tr>
+                                        <th class="col-rank">#</th>
+                                        <th class="col-team">팀명</th>
+                                        <th class="col-check" style="display:none;">CP</th>
+                                        <th class="col-total">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="leaderboardBody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="section-input">
+                        <h3 class="board-title"><i class="fa-solid fa-keyboard"></i> 점수 입력 (Team순 고정)</h3>
+                        <div class="table-scroll-wrapper">
+                            <table class="score-table input-table">
+                                <thead>
+                                    <tr id="inputTableHeader">
+                                        <th class="col-fixed-team">팀명</th>
+                                        <th class="col-total-preview">합계</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="inputBody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <script type="module" src="assets/js/score.js"></script>
+            <script type="module" src="assets/js/theme.js"></script>
+</body>
+
+</html>

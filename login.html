@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 로그인 - 무한섬 Manager</title>
+    <link rel="shortcut icon" href="#">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/theme.css">
+    <link rel="stylesheet" href="assets/css/login.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <script>
+        (function() {
+            // 로컬 스토리지에서 테마를 가져옴
+            const savedTheme = localStorage.getItem('infinite_theme') || 'dark';
+            // 화면이 그려지기 전에 body에 클래스를 미리 붙여버림
+            document.body.classList.add(savedTheme + '-mode');
+        })();
+    </script>
+    <div class="login-container">
+        <div class="login-box">
+            <div class="logo-area">
+                <h1 class="brand-logo"><i class="fa-solid fa-infinity"></i> 무한섬</h1>
+                <p>Manager System</p>
+            </div>
+            
+            <form id="loginForm">
+                <div class="input-group">
+                    <label>Email</label>
+                    <input type="email" id="email" placeholder="admin@example.com" required>
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" id="password" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn-login" id="loginBtn">로그인</button>
+            </form>
+            <p id="errorMsg" class="error-msg"></p>
+        </div>
+    </div>
+
+    <script type="module" src="assets/js/login.js"></script>
+</body>
+</html>

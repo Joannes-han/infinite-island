@@ -1,0 +1,191 @@
+/* assets/css/style.css */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    height: 100vh;
+    overflow: hidden;
+    transition: background-color 0.3s, color 0.3s; /* 테마 변경 시 부드럽게 */
+}
+
+a { text-decoration: none; color: inherit; transition: 0.3s; }
+ul { list-style: none; }
+
+.app-container { display: flex; height: 100vh; width: 100vw; }
+
+/* 사이드바 */
+.sidebar {
+    width: var(--sidebar-width);
+    background-color: var(--bg-panel);
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    padding: 30px 20px;
+    flex-shrink: 0;
+    z-index: 100;
+    transition: background-color 0.3s;
+}
+
+.sidebar-header {
+    margin-bottom: 50px;
+    text-align: center;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 20px;
+}
+
+.brand-logo {
+    font-size: 24px; font-weight: 800; color: var(--accent-gold);
+}
+
+.menu-list { flex-grow: 1; display: flex; flex-direction: column; gap: 10px; }
+
+.menu-item {
+    display: flex; align-items: center; padding: 14px 20px;
+    color: var(--text-muted);
+    border-radius: 4px; font-weight: 600; font-size: 15px;
+    border-left: 3px solid transparent;
+}
+.menu-item i { margin-right: 15px; width: 20px; text-align: center; }
+
+.menu-item:hover {
+    background-color: var(--bg-hover);
+    color: var(--text-main);
+}
+
+.menu-item.active {
+    background-color: var(--accent-gold-dim);
+    color: var(--accent-gold);
+    border-left: 3px solid var(--accent-gold);
+}
+
+.sidebar-footer { text-align: center; font-size: 12px; color: var(--text-muted); margin-top: 20px; }
+
+/* 메인 콘텐츠 */
+.content-area {
+    flex-grow: 1; display: flex; flex-direction: column;
+    position: relative;
+    background-color: var(--bg-main);
+    overflow: hidden;
+    transition: background-color 0.3s;
+}
+
+.top-bar {
+    padding: 20px 40px; display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid var(--border-color);
+    background-color: var(--bg-main); /* 탑바 배경 */
+    height: 80px; flex-shrink: 0;
+}
+
+.page-title {
+    font-size: 22px; font-weight: 700;
+    color: var(--text-main);
+    border-left: 4px solid var(--accent-gold);
+    padding-left: 15px;
+}
+
+.page-content-container { padding: 30px 40px; flex-grow: 1; overflow-y: auto; }
+
+/* 대시보드 스타일 */
+.dashboard-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; padding-bottom: 50px; }
+
+.dash-card {
+    background-color: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    border-radius: 12px; padding: 25px;
+    display: flex; flex-direction: column; min-height: 180px; position: relative;
+    transition: transform 0.2s, background-color 0.3s;
+}
+.dash-card:hover { transform: translateY(-3px); }
+.dash-card h3 { color: var(--text-muted); margin: 0 0 15px 0; font-size: 16px; font-weight: 600; }
+
+.big-number { font-size: 36px; font-weight: 800; color: var(--text-main); margin-bottom: 10px; }
+.card-icon { color: var(--text-muted); opacity: 0.1; position: absolute; top: 20px; right: 20px; font-size: 40px;}
+
+/* 출석 바 */
+.progress-bar-bg { background-color: var(--bg-hover); height: 8px; border-radius: 4px; overflow: hidden; margin-bottom: 8px; }
+.progress-bar-fill { background-color: #2ed573; height: 100%; transition: width 1s; }
+.sub-text { font-size: 13px; color: var(--text-muted); }
+
+/* 챔피언, 티어, 라이브 카드 */
+.champion-card { border-left: 4px solid var(--accent-gold); }
+.champion-card .card-icon { color: var(--accent-gold); opacity: 0.2; }
+.champ-name { font-size: 24px; font-weight: 800; color: var(--accent-gold); margin-bottom: 5px; }
+.champ-members { font-size: 14px; color: var(--text-main); margin-bottom: 10px; }
+
+.tier-dist-card { grid-column: span 2; }
+.tier-chart-container { display: flex; align-items: flex-end; gap: 15px; height: 150px; padding-top: 20px; }
+.chart-bar-group { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; height: 100%; justify-content: flex-end; }
+.chart-bar { width: 100%; background-color: var(--bg-hover); border-radius: 4px 4px 0 0; transition: height 1s; min-height: 2px; }
+.chart-label { font-size: 12px; color: var(--text-muted); font-weight: bold; }
+.chart-value { font-size: 12px; color: var(--text-main); margin-bottom: 2px; }
+
+.live-rank-card { border: 1px solid #2980b9; background: var(--bg-panel); }
+.card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+.live-badge { background: #e74c3c; color: white; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: bold; animation: pulse 2s infinite; }
+.live-content { flex: 1; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+.live-team-name { font-size: 22px; font-weight: bold; color: var(--text-main); }
+.live-score { font-size: 16px; color: var(--accent-gold); font-weight: bold; margin-top: 5px; }
+.no-data { color: var(--text-muted); font-size: 14px; }
+.date-display { color: var(--text-muted); font-size: 14px; font-weight: 600; }
+
+/* === 최다 우승자(MVP) 카드 === */
+.mvp-card {
+    border: 1px solid var(--accent-gold);
+    background: linear-gradient(145deg, var(--bg-panel), rgba(238, 188, 81, 0.05));
+    position: relative;
+}
+
+.mvp-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* MVP 프로필 사진 틀 */
+.mvp-img-box {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 3px solid var(--accent-gold);
+    box-shadow: 0 0 20px var(--accent-gold-dim);
+    overflow: hidden;
+    margin-bottom: 15px;
+    background-color: var(--bg-main);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mvp-img-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.mvp-img-box i {
+    font-size: 40px;
+    color: var(--text-muted);
+}
+
+/* 텍스트 정보 */
+.mvp-name {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--text-main);
+    margin-bottom: 5px;
+}
+
+.mvp-count-badge {
+    background-color: var(--accent-gold);
+    color: #000;
+    font-weight: bold;
+    font-size: 14px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}

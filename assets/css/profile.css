@@ -1,0 +1,147 @@
+/* assets/css/profile.css */
+
+/* 검색창 (작게 변경) */
+.search-wrapper-small {
+    position: relative; width: 250px;
+}
+.search-wrapper-small i {
+    position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted);
+}
+.search-wrapper-small input {
+    width: 100%; padding: 8px 8px 8px 30px; border-radius: 6px;
+    border: 1px solid var(--border-color); background-color: var(--bg-input);
+    color: var(--text-main); outline: none;
+}
+.search-wrapper-small input:focus { border-color: var(--accent-gold); }
+
+/* === 메인 테이블 스타일 === */
+.table-scroll-wrapper {
+    background-color: var(--bg-panel);
+    border: 1px solid var(--border-color); border-radius: 8px;
+    overflow: auto; height: 100%;
+}
+
+.profile-table { width: 100%; border-collapse: collapse; }
+.profile-table th {
+    text-align: left; padding: 15px;
+    background-color: var(--bg-hover); color: var(--text-muted);
+    border-bottom: 1px solid var(--border-color);
+    position: sticky; top: 0; z-index: 10;
+}
+.profile-table td {
+    padding: 12px 15px; border-bottom: 1px solid var(--border-color);
+    color: var(--text-main); vertical-align: middle;
+}
+.profile-table tbody tr { transition: background-color 0.2s; cursor: pointer; }
+.profile-table tbody tr:hover { background-color: var(--bg-hover); }
+
+/* 테이블 내 선수 정보 */
+.td-player-info { display: flex; align-items: center; gap: 10px; }
+.td-img {
+    width: 36px; height: 36px; border-radius: 6px; background-color: var(--bg-hover);
+    display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid var(--border-color);
+}
+.td-img img { width: 100%; height: 100%; object-fit: cover; }
+.td-name { font-weight: bold; font-size: 14px; }
+
+.text-win-rate { font-weight: bold; color: var(--accent-gold); }
+
+
+/* === ★ 모달 (팝업) 스타일 ★ === */
+.modal-overlay {
+    display: none; /* 기본 숨김 */
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.7); /* 어두운 배경 */
+    z-index: 1000;
+    justify-content: center; align-items: center;
+    backdrop-filter: blur(5px);
+}
+.modal-overlay.active { display: flex; animation: fadeIn 0.2s; }
+
+.modal-content {
+    width: 600px; max-width: 90%; max-height: 90vh;
+    background-color: var(--bg-panel);
+    border: 1px solid var(--border-color); border-radius: 12px;
+    padding: 30px;
+    position: relative;
+    overflow-y: auto;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+}
+
+.close-btn {
+    position: absolute; top: 15px; right: 15px;
+    background: none; border: none; color: var(--text-muted);
+    font-size: 24px; cursor: pointer; transition: 0.2s;
+}
+.close-btn:hover { color: var(--accent-gold); }
+
+/* (아래는 기존 프로필 상세 스타일 재사용) */
+.profile-header-card {
+    display: flex; align-items: center; gap: 20px;
+    background-color: var(--bg-hover); border: 1px solid var(--border-color);
+    padding: 20px; border-radius: 12px; margin-bottom: 20px;
+}
+.profile-img-large {
+    width: 80px; height: 80px; border-radius: 50%;
+    background-color: var(--bg-main); border: 3px solid var(--accent-gold);
+    overflow: hidden; display: flex; align-items: center; justify-content: center;
+}
+.profile-img-large img { width: 100%; height: 100%; object-fit: cover; }
+.profile-img-large i { font-size: 40px; color: var(--text-muted); }
+
+.profile-name-row h1 { margin: 0; font-size: 24px; color: var(--text-main); }
+.tier-badge {
+    background-color: var(--bg-main); color: var(--accent-gold);
+    padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 12px;
+}
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+.stat-box { background-color: var(--bg-hover); border: 1px solid var(--border-color); padding: 15px; border-radius: 8px; text-align: center; }
+.stat-label { font-size: 12px; color: var(--text-muted); }
+.stat-value { font-size: 20px; font-weight: 800; color: var(--text-main); }
+.win-box .stat-value { color: var(--accent-gold); }
+
+.section-title { font-size: 16px; color: var(--text-main); margin-bottom: 10px; border-left: 4px solid var(--accent-gold); padding-left: 10px; }
+
+.match-card {
+    display: flex; align-items: center; justify-content: space-between;
+    background-color: var(--bg-hover); border: 1px solid var(--border-color);
+    padding: 12px 15px; border-radius: 6px; margin-bottom: 8px;
+}
+.match-info { display: flex; flex-direction: column; gap: 2px; }
+.match-title { font-weight: bold; color: var(--text-main); font-size: 14px; }
+.match-date, .match-team { font-size: 12px; color: var(--text-muted); }
+.match-rank { font-size: 18px; font-weight: 800; color: var(--text-muted); width: 60px; text-align: right; }
+.match-rank.rank-1 { color: #ffd700; }
+.match-rank.rank-2 { color: #c0c0c0; }
+.match-rank.rank-3 { color: #cd7f32; }
+
+@keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+
+/* 스크롤바 */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-main); }
+::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* === 정렬 가능한 헤더 스타일 === */
+.profile-table th.sortable {
+    cursor: pointer;
+    user-select: none; /* 텍스트 드래그 방지 */
+    transition: background-color 0.2s;
+}
+
+.profile-table th.sortable:hover {
+    background-color: var(--bg-main);
+    color: var(--text-main);
+}
+
+.sort-icon {
+    margin-left: 5px;
+    font-size: 12px;
+    color: var(--border-color); /* 평소엔 흐리게 */
+}
+
+/* 정렬 활성화 시 아이콘 색상 강조 */
+.profile-table th.active .sort-icon {
+    color: var(--accent-gold);
+}

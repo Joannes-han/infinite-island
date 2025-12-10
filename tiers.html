@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>티어 관리 - 무한섬 Manager</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/theme.css">
+    <link rel="stylesheet" href="assets/css/tiers.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script type="module" src="assets/js/auth.js"></script>
+</head>
+
+<body>
+    <script>
+        (function () {
+            // 로컬 스토리지에서 테마를 가져옴
+            const savedTheme = localStorage.getItem('infinite_theme') || 'dark';
+            // 화면이 그려지기 전에 body에 클래스를 미리 붙여버림
+            document.body.classList.add(savedTheme + '-mode');
+        })();
+    </script>
+    <div class="app-container">
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h1 class="brand-logo"><i class="fa-solid fa-infinity"></i> 무한섬</h1>
+            </div>
+
+            <ul class="menu-list">
+                <li><a href="index.html" class="menu-item"><i class="fa-solid fa-house"></i> 대시보드</a></li>
+                <li><a href="attendance.html" class="menu-item"><i class="fa-solid fa-clipboard-check"></i> 출/퇴근 관리</a>
+                </li>
+                <li><a href="draft.html" class="menu-item"><i class="fa-solid fa-people-group"></i> 팀 드래프트</a></li>
+                <li><a href="score.html" class="menu-item"><i class="fa-solid fa-trophy"></i> 경기 점수판</a></li>
+                <li><a href="hall_of_fame.html" class="menu-item"><i class="fa-solid fa-crown"></i> 명예의 전당</a></li>
+                <li><a href="profile.html" class="menu-item"><i class="fa-solid fa-user-tag"></i> 전적 검색</a></li>
+                <li><a href="tiers.html" class="menu-item active"><i class="fa-solid fa-ranking-star"></i> 선수 티어표</a>
+                </li>
+            </ul>
+
+            <div style="margin-top: auto; padding-top: 20px; border-top: 1px solid #333;">
+                <a href="#" id="themeToggleBtn" class="menu-item">
+                    <i class="fa-solid fa-moon"></i> 다크 모드
+                </a>
+                <a href="#" id="logoutBtn" class="menu-item" style="color: #ff4757;">
+                    <i class="fa-solid fa-right-from-bracket"></i> 로그아웃
+                </a>
+            </div>
+
+            <div class="sidebar-footer">
+                <p>Designed for Eternal Return</p>
+            </div>
+        </nav>
+
+        <main class="content-area">
+            <header class="top-bar">
+                <h2 class="page-title">선수 티어 관리</h2>
+                <button id="saveBtn" class="btn-save">
+                    <i class="fa-solid fa-floppy-disk"></i> 변경사항 저장
+                </button>
+            </header>
+
+            <div class="page-content-container">
+                <div class="tier-board">
+                    <div class="tier-row" data-tier="SSS" data-cost="8">
+                        <div class="tier-header sss">SSS <span class="cost-badge">8코</span></div>
+                        <div class="tier-body" id="tier-sss"></div>
+                    </div>
+
+                    <div class="tier-row" data-tier="SS" data-cost="7">
+                        <div class="tier-header ss">SS <span class="cost-badge">7코</span></div>
+                        <div class="tier-body" id="tier-ss"></div>
+                    </div>
+
+                    <div class="tier-row" data-tier="S" data-cost="6">
+                        <div class="tier-header s">S <span class="cost-badge">6코</span></div>
+                        <div class="tier-body" id="tier-s"></div>
+                    </div>
+
+                    <div class="tier-row" data-tier="A" data-cost="5">
+                        <div class="tier-header a">A <span class="cost-badge">5코</span></div>
+                        <div class="tier-body" id="tier-a"></div>
+                    </div>
+
+                    <div class="tier-row" data-tier="B" data-cost="4">
+                        <div class="tier-header b">B <span class="cost-badge">4코</span></div>
+                        <div class="tier-body" id="tier-b"></div>
+                    </div>
+
+                    <div class="tier-row" data-tier="C" data-cost="3">
+                        <div class="tier-header c">C <span class="cost-badge">3코</span></div>
+                        <div class="tier-body" id="tier-c"></div>
+                    </div>
+
+                    <div class="tier-row" data-tier="D" data-cost="2">
+                        <div class="tier-header d">D <span class="cost-badge">2코</span></div>
+                        <div class="tier-body" id="tier-d"></div>
+                    </div>
+
+                    <div class="tier-row" data-tier="F" data-cost="1">
+                        <div class="tier-header f">F <span class="cost-badge">1코</span></div>
+                        <div class="tier-body" id="tier-f"></div>
+                    </div>
+                </div>
+
+                <div class="player-management-area">
+                    <div class="add-player-box">
+                        <h3><i class="fa-solid fa-user-plus"></i> 새 선수 등록</h3>
+                        <div class="input-group">
+                            <input type="text" id="newPlayerName" placeholder="선수 닉네임 입력">
+                            <button id="addBtn" class="btn-add">추가</button>
+                        </div>
+                    </div>
+
+                    <div id="delete-zone" class="delete-box">
+                        <i class="fa-solid fa-trash-can"></i>
+                        <span>선수 삭제 (여기로 드래그)</span>
+                    </div>
+
+                    <div class="unassigned-box">
+                        <h3>미배정 / 대기 명단</h3>
+                        <div class="tier-body" id="tier-unassigned">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script type="module" src="assets/js/tiers.js"></script>
+    <script type="module" src="assets/js/theme.js"></script>
+</body>
+
+</html>
