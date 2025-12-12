@@ -137,14 +137,87 @@
     cursor: pointer; font-weight: 600; font-size: 13px;
     display: flex; align-items: center; gap: 6px; color: white; transition: 0.2s;
 }
+/* assets/css/draft.css - 맨 아래에 추가/수정 */
+
+/* =========================================
+   버튼 그룹 디자인 (통일감 부여)
+   ========================================= */
+.control-group {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end; /* 오른쪽 정렬 */
+    gap: 8px; /* 버튼 사이 간격 */
+    flex-wrap: wrap; 
+    margin-bottom: 20px;
+}
+
+/* ★ 모든 버튼 공통 스타일 (크기 강제 통일) */
+.btn-control {
+    height: 42px; /* 높이 통일 */
+    padding: 0 18px;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    
+    font-size: 14px;
+    font-weight: 700;
+    color: white;
+    
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px; 
+    
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+}
+
+/* 눌렀을 때 효과 */
+.btn-control:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+/* 호버 효과 (밝게) */
+.btn-control:hover {
+    filter: brightness(1.1);
+}
+
+/* --- ★ 기존 색상 복구 --- */
+
+/* 1. 팀 추가/삭제 */
 .btn-add-team { background-color: #16a085; }
 .btn-remove-team { background-color: #c0392b; }
+
+/* 2. 자동 배정 (Magic) */
+.btn-magic { 
+    background-color: #8e44ad; 
+    border-color: #9b59b6; 
+}
+
+/* 3. 복사 */
 .btn-copy { background-color: #2980b9; }
+
+/* 4. 초기화 */
 .btn-reset { background-color: #2c3e50; }
-.btn-magic { background-color: #8e44ad; border-color: #9b59b6; }
+
+/* 5. [신규] 저장 버튼 (눈에 띄게 주황색) */
+.btn-save-team {
+    background: linear-gradient(135deg, #f39c12, #d35400);
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+/* 비활성화 상태 */
+.btn-control:disabled {
+    background: #7f8c8d;
+    color: #bdc3c7;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
 
 /* 스크롤바 */
 ::-webkit-scrollbar { width: 8px; }
 ::-webkit-scrollbar-track { background: var(--bg-main); }
 ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
