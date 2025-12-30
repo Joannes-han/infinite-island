@@ -4,26 +4,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>대시보드 - 무한섬 Manager</title>
-    <link rel="shortcut icon" href="#">
+    <title>무한섬 - 대시보드</title>
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="assets/css/theme.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="assets/css/dashboard.css">
 
-    <script type="module" src="assets/js/auth.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body>
     <script>
         (function () {
-            // 로컬 스토리지에서 테마를 가져옴
-            const savedTheme = localStorage.getItem('infinite_theme') || 'dark';
-            // 화면이 그려지기 전에 body에 클래스를 미리 붙여버림
-            document.body.classList.add(savedTheme + '-mode');
+            // 다른 페이지와 통일된 키값('site_theme' or 'infinite_theme') 사용
+            // 여기서는 기존 로직대로 'infinite_theme'을 씁니다.
+            const savedTheme = localStorage.getItem('infinite_theme');
+            if (savedTheme) {
+                document.body.classList.add(savedTheme + '-mode');
+            }
         })();
     </script>
+
     <div class="app-container">
+
         <nav class="sidebar">
             <div class="sidebar-header">
                 <h1 class="brand-logo"><i class="fa-solid fa-infinity"></i> 무한섬</h1>
@@ -35,9 +40,10 @@
                 </li>
                 <li><a href="draft.html" class="menu-item"><i class="fa-solid fa-people-group"></i> 팀 드래프트</a></li>
                 <li><a href="score.html" class="menu-item"><i class="fa-solid fa-trophy"></i> 경기 점수판</a></li>
-                <li><a href="hall_of_fame.html" class="menu-item"><i class="fa-solid fa-crown"></i> 명예의 전당</a></li>
-                <li><a href="profile.html" class="menu-item"><i class="fa-solid fa-user-tag"></i> 전적 검색</a></li>
+                <li><a href="hall_of_fame.html" class="menu-item"><i class="fa-solid fa-crown"></i> 우승 기록</a></li>
+                <li><a href="profile.html" class="menu-item"><i class="fa-solid fa-user-tag"></i> 개인 기록</a></li>
                 <li><a href="tiers.html" class="menu-item"><i class="fa-solid fa-ranking-star"></i> 선수 티어표</a></li>
+                <li><a href="inquiry.html" class="menu-item"><i class="fa-solid fa-envelope"></i> 관리자 문의</a></li>
             </ul>
 
             <div style="margin-top: auto; padding-top: 20px; border-top: 1px solid #333;">
@@ -55,70 +61,88 @@
         </nav>
 
         <main class="content-area">
-            <header class="top-bar">
-                <h2 class="page-title">대시보드</h2>
-                <div class="date-display" id="currentDate">2025. 00. 00</div>
+
+            <header class="dashboard-header">
+                <div class="header-left">
+                    <h2 class="page-title">Dashboard</h2>
+                    <p class="current-date" id="currentDateDisplay">2024. 05. 21 (Tue)</p>
+                </div>
+                <div class="header-right">
+                    <div class="status-pill live">
+                        <span class="pulse-dot"></span>
+                        <span id="matchStatusText">LIVE ON</span>
+                    </div>
+                    <div class="digital-clock" id="gameTimer">00:00</div>
+                </div>
             </header>
 
-            <div class="page-content-container">
-                <div class="dashboard-grid">
+            <div class="bento-grid">
 
-                    <div class="dash-card attendance-card">
-                        <div class="card-icon"><i class="fa-solid fa-users"></i></div>
-                        <div class="card-info">
-                            <h3>현재 출석 인원</h3>
-                            <div class="big-number" id="attendanceCount">0 / 0</div>
-                            <div class="progress-bar-bg">
-                                <div class="progress-bar-fill" id="attendanceBar" style="width: 0%"></div>
-                            </div>
-                            <p class="sub-text" id="attendancePercent">출석률 0%</p>
-                        </div>
+                <div class="card stat-card">
+                    <div class="card-header"><i class="fa-solid fa-trophy"></i> 최다 우승</div>
+                    <div class="card-body" id="statMostWins">
+                        <div class="loading-spinner"></div>
                     </div>
-
-                    <div class="dash-card champion-card">
-                        <div class="card-icon"><i class="fa-solid fa-crown"></i></div>
-                        <div class="card-info">
-                            <h3>Last Champion</h3>
-                            <div class="champ-name" id="lastWinnerTeam">-</div>
-                            <div class="champ-members" id="lastWinnerMembers">기록 없음</div>
-                            <p class="sub-text" id="lastWinnerDate">-</p>
-                        </div>
-                    </div>
-
-                    <div class="dash-card tier-dist-card">
-                        <h3><i class="fa-solid fa-chart-simple"></i> 금일 참여 선수 티어 분포</h3>
-                        <div class="tier-chart-container" id="tierChart">
-                            <p style="color:#555; text-align:center; margin-top:20px;">데이터 로딩 중...</p>
-                        </div>
-                    </div>
-
-                    <div class="dash-card live-rank-card">
-                        <div class="card-header">
-                            <h3><i class="fa-solid fa-trophy"></i> LIVE Ranking</h3>
-                            <span class="live-badge">NOW</span>
-                        </div>
-                        <div class="live-content" id="liveRankContent">
-                            <div class="no-data">경기 대기 중</div>
-                        </div>
-                    </div>
-
-                    <div class="dash-card mvp-card">
-                        <div class="card-header">
-                            <h3><i class="fa-solid fa-medal"></i> Hall of Fame MVP</h3>
-                            <i class="fa-solid fa-star" style="color:var(--accent-gold)"></i>
-                        </div>
-                        <div class="mvp-content" id="mvpContent">
-                            <p style="color:#555; margin-top:30px;">데이터 로딩 중...</p>
-                        </div>
-                    </div>
-
                 </div>
+
+                <div class="card stat-card">
+                    <div class="card-header"><i class="fa-solid fa-fire"></i> 최다 출전</div>
+                    <div class="card-body" id="statMostGames">
+                        <div class="loading-spinner"></div>
+                    </div>
+                </div>
+
+                <div class="card stat-card">
+                    <div class="card-header"><i class="fa-solid fa-star"></i> 평균 순위</div>
+                    <div class="card-body" id="statBestRank">
+                        <div class="loading-spinner"></div>
+                    </div>
+                </div>
+
+                <div class="card rank-panel span-2-row span-2-col">
+                    <div class="card-header flex-between">
+                        <span><i class="fa-solid fa-ranking-star"></i> 실시간 팀 순위</span>
+                        <span class="refresh-badge" id="btnRefreshRanking" style="cursor: pointer;">
+                            <i class="fa-solid fa-rotate" id="iconRefresh"></i> 
+                        </span>
+                    </div>
+                    <div class="table-wrapper">
+                        <table class="modern-table">
+                            <thead>
+                                <tr>
+                                    <th width="10%">#</th>
+                                    <th width="20%">TEAM</th>
+                                    <th>MEMBERS</th>
+                                    <th width="15%">PTS</th>
+                                    <th width="15%">GAP</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rankingTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card winner-card">
+                    <div class="card-bg-glow"></div>
+                    <div class="card-header"><i class="fa-solid fa-crown"></i> Last Winner</div>
+                    <div class="winner-content" id="lastWinnerBox">
+                        <p class="no-data">기록 없음</p>
+                    </div>
+                </div>
+
+                <div class="card podium-card">
+                    <div class="card-header"><i class="fa-solid fa-medal"></i> Top 3 Leaders</div>
+                    <div class="podium-mini-list" id="podiumArea">
+                    </div>
+                </div>
+
             </div>
         </main>
     </div>
 
-    <script type="module" src="assets/js/index.js"></script>
-    <script type="module" src="assets/js/theme.js"></script>
+    <script type="module" src="assets/js/home.js"></script>
+    <script type="module" src="assets/js/auth.js"></script>
 </body>
 
 </html>

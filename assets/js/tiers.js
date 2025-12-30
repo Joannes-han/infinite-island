@@ -1,77 +1,108 @@
 import { supabase } from './supabase.js';
 
-// 페이지 로드 시 실행
+// ==========================================
+// 1. 초기화 (페이지 로드 시 실행)
+// ==========================================
 document.addEventListener('DOMContentLoaded', () => {
-    loadPlayers();
-    setupDragAndDrop();
-    setupEventListeners();
-    setupDeleteZone();
+    loadPlayers();          // 데이터 불러오기
+    setupDragEvents();      // 드래그 설정
+    setupEventListeners();  // 버튼 이벤트 연결
+    setupDeleteZone();      // 삭제 구역 설정
 });
 
-// 1. DB에서 선수 목록 불러오기
+// ==========================================
+// 2. 데이터 불러오기 및 배치 (핵심)
+// ==========================================
 async function loadPlayers() {
+    // 1. 화면 초기화
+    document.querySelectorAll('.tier-body').forEach(el => el.innerHTML = '');
+    
+    // 미배정 구역 찾기 (둘 중 하나라도 걸려라)
+    const unassignedBox = document.getElementById('tier-unassigned') || document.getElementById('pool-unranked');
+    if (unassignedBox) unassignedBox.innerHTML = '';
+
+    // 2. DB 데이터 가져오기
     const { data, error } = await supabase
         .from('players')
         .select('*')
-        .order('name', { ascending: true }); // 이름순 정렬
+        .order('name', { ascending: true });
 
     if (error) {
-        alert("데이터 불러오기 실패!");
-        console.error(error);
+        console.error("데이터 로딩 실패:", error);
         return;
     }
 
-    // 화면 초기화
-    document.querySelectorAll('.tier-body').forEach(el => el.innerHTML = '');
-
-    // 선수 배치
+    // 3. 배치 시작
     data.forEach(player => {
-        createPlayerCard(player);
+        const card = createPlayerCard(player);
+
+        if (player.tier) {
+            // DB값(Chicken) -> 소문자 변환(chicken) -> ID 조합(tier-chicken)
+            const cleanTier = player.tier.trim(); // 공백 제거
+            const targetId = `tier-${cleanTier.toLowerCase()}`;
+            const container = document.getElementById(targetId);
+
+            if (container) {
+                // 방을 찾음 -> 입장
+                container.appendChild(card);
+            } else {
+                // ★ 방을 못 찾음 -> 여기가 문제! 콘솔에 경고 출력
+                console.warn(`🚨 [오류 발생] 선수는 "${cleanTier}" 티어인데, HTML에 id="${targetId}" 박스가 없습니다!`);
+                console.log(`DB 저장된 값: ${player.tier}`);
+                
+                // 임시로 미배정에 넣음
+                if (unassignedBox) unassignedBox.appendChild(card);
+            }
+        } else {
+            // 티어가 없음(null) -> 미배정
+            if (unassignedBox) unassignedBox.appendChild(card);
+        }
     });
 }
 
-// 2. 선수 카드 생성 및 배치 함수
+// ==========================================
+// 3. 카드 생성 함수 (★ 사진 제거됨)
+// ==========================================
 function createPlayerCard(player) {
-    const card = document.createElement('div');
-    card.classList.add('player-card');
-    card.draggable = true; // 드래그 가능하게 설정
-    card.textContent = player.name;
-    card.dataset.id = player.id; // 카드에 선수 ID 숨겨두기
+    const div = document.createElement('div');
+    div.className = 'player-card'; // 기존 CSS 클래스 사용
     
-    // DB에 저장된 티어 위치로 보내기
-    let targetTierId = 'tier-unassigned'; // 기본값
-    if (player.tier) {
-        const tierId = `tier-${player.tier.toLowerCase()}`;
-        if (document.getElementById(tierId)) {
-            targetTierId = tierId;
-        }
-    }
-    
-    document.getElementById(targetTierId).appendChild(card);
+    // 데이터셋 저장 (이동/저장용)
+    div.dataset.id = player.id;
+    div.dataset.name = player.name; 
 
-    // 드래그 이벤트 다시 연결 (새로 생긴 카드니까)
-    addDragEvents(card);
+    // ★ [수정] 이미지를 없애고 텍스트만 넣습니다.
+    // 기존 디자인이 깨지지 않도록 이름만 깔끔하게 출력
+    div.textContent = player.name;
+
+    // 드래그 가능하게 설정
+    div.draggable = true;
+    div.addEventListener('dragstart', handleDragStart);
+    div.addEventListener('dragend', handleDragEnd);
+
+    return div; // 만든 카드 반환
 }
 
-// 3. 드래그 앤 드롭 로직
-function setupDragAndDrop() {
-    const containers = document.querySelectorAll('.tier-body');
+// ==========================================
+// 4. 드래그 앤 드롭 로직
+// ==========================================
+function handleDragStart(e) {
+    e.dataTransfer.setData('text/plain', e.target.dataset.id);
+    e.dataTransfer.effectAllowed = 'move';
+    setTimeout(() => { e.target.classList.add('dragging'); }, 0);
+}
 
+function handleDragEnd(e) {
+    e.target.classList.remove('dragging');
+}
+
+function setupDragEvents() {
+    // 모든 티어 박스와 미배정 구역에 드롭 허용
+    const containers = document.querySelectorAll('.tier-body, #tier-unassigned, #pool-unranked');
+    
     containers.forEach(container => {
-        container.addEventListener('dragover', e => {
-            e.preventDefault(); // 이걸 해야 드롭 가능
-            container.classList.add('drag-over');
-        });
-
-        container.addEventListener('dragleave', () => {
-            container.classList.remove('drag-over');
-        });
-
-        container.addEventListener('drop', e => {
-            e.preventDefault();
-            container.classList.remove('drag-over');
-            
-            // 현재 드래그 중인 카드 가져오기
+        container.addEventListener('dragover', (e) => {
+            e.preventDefault(); // 드롭 허용
             const draggingCard = document.querySelector('.dragging');
             if (draggingCard) {
                 container.appendChild(draggingCard);
@@ -80,118 +111,107 @@ function setupDragAndDrop() {
     });
 }
 
-function addDragEvents(card) {
-    card.addEventListener('dragstart', () => {
-        card.classList.add('dragging');
-    });
-
-    card.addEventListener('dragend', () => {
-        card.classList.remove('dragging');
-    });
-}
-
-// 4. 저장 및 추가 버튼 이벤트
+// ==========================================
+// 5. 버튼 이벤트 (저장, 추가)
+// ==========================================
 function setupEventListeners() {
-    // 1. 저장 버튼 클릭
-    document.getElementById('saveBtn').addEventListener('click', saveAllChanges);
+    const saveBtn = document.getElementById('saveBtn');
+    if(saveBtn) saveBtn.addEventListener('click', saveAllChanges);
 
-    // 2. 선수 추가 버튼 클릭
-    document.getElementById('addBtn').addEventListener('click', addNewPlayer);
+    const addBtn = document.getElementById('addBtn');
+    if(addBtn) addBtn.addEventListener('click', addNewPlayer);
 
-    // 3. ★ 추가된 기능: 입력창에서 엔터키(Enter) 입력 시 추가 실행
-    document.getElementById('newPlayerName').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            addNewPlayer();
-        }
-    });
+    const nameInput = document.getElementById('newPlayerName');
+    if(nameInput) {
+        nameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addNewPlayer();
+        });
+    }
 }
 
-// ★ 변경사항 일괄 저장 (핵심 기능)
+// ==========================================
+// 6. 저장 기능 (Save)
+// ==========================================
 async function saveAllChanges() {
-    const updates = [];
     const saveBtn = document.getElementById('saveBtn');
-    
-    // 버튼 상태 변경 (저장 중...)
     const originalText = saveBtn.innerHTML;
+    
     saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 저장 중...';
+    saveBtn.disabled = true;
 
-    // 1. 티어 박스에 있는 선수들 수집
-    document.querySelectorAll('.tier-row').forEach(row => {
-        const tierName = row.dataset.tier;
-        const tierCost = parseInt(row.dataset.cost);
-        
-        const cards = row.querySelectorAll('.player-card');
-        cards.forEach(card => {
-            const playerId = card.dataset.id;
-            // ★ 중요 수정: ID를 숫자로 변환하고, 이름(name)도 같이 보냄!
-            updates.push({
-                id: parseInt(playerId),     // 문자를 숫자로 변환 ('1' -> 1)
-                name: card.textContent,     // 이름이 없으면 에러나므로 꼭 포함
-                tier: tierName,
-                cost: tierCost
+    try {
+        const updates = [];
+
+        // 1. 티어 박스 스캔
+        document.querySelectorAll('.tier-row').forEach(row => {
+            const tierName = row.dataset.tier; 
+            const tierCost = parseInt(row.dataset.cost || 0);
+            
+            row.querySelectorAll('.player-card').forEach(card => {
+                updates.push({
+                    id: parseInt(card.dataset.id),
+                    name: card.dataset.name || card.textContent.trim(),
+                    tier: tierName,
+                    cost: tierCost
+                });
             });
         });
-    });
 
-    // 2. 미배정 구역에 있는 선수들 수집
-    const unassignedCards = document.querySelectorAll('#tier-unassigned .player-card');
-    unassignedCards.forEach(card => {
-        const playerId = card.dataset.id;
-        updates.push({
-            id: parseInt(playerId),         // 숫자로 변환
-            name: card.textContent,         // 이름 포함
-            tier: null,
-            cost: 0
+        // 2. 미배정 구역 스캔
+        const unassignedCards = document.querySelectorAll('#tier-unassigned .player-card, #pool-unranked .player-card');
+        unassignedCards.forEach(card => {
+            updates.push({
+                id: parseInt(card.dataset.id),
+                name: card.dataset.name || card.textContent.trim(),
+                tier: null,
+                cost: 0
+            });
         });
-    });
 
-    console.log("보내는 데이터:", updates); // 콘솔에서 확인용
+        // 3. DB 업데이트
+        const { error } = await supabase.from('players').upsert(updates);
 
-    // 3. Supabase에 업데이트
-    const { error } = await supabase
-        .from('players')
-        .upsert(updates);
+        if (error) throw error;
 
-    if (error) {
-        alert("저장 실패 ㅠㅠ (콘솔 확인)");
-        console.error("Supabase Error:", error);
-    } else {
-        alert("저장 완료! ✅");
-        // 저장 후 목록 다시 불러오기 (확실한 동기화)
-        loadPlayers(); 
+        alert("✅ 저장되었습니다!");
+        await loadPlayers(); // 화면 동기화
+
+    } catch (err) {
+        console.error("저장 실패:", err);
+        alert("저장 중 오류가 발생했습니다.");
+    } finally {
+        saveBtn.innerHTML = originalText;
+        saveBtn.disabled = false;
     }
-
-    saveBtn.innerHTML = originalText;
 }
 
-// ★ 새 선수 추가
+// ==========================================
+// 7. 선수 추가 및 삭제
+// ==========================================
 async function addNewPlayer() {
     const input = document.getElementById('newPlayerName');
     const name = input.value.trim();
 
     if (!name) return alert("이름을 입력하세요!");
 
-    // DB에 추가
     const { data, error } = await supabase
         .from('players')
-        .insert([{ name: name, tier: null, cost: 0, status: 'waiting' }])
+        .insert([{ name: name, tier: null, cost: 0 }])
         .select();
 
-    if (error) {
-        alert("추가 실패!");
-        console.error(error);
+    if (!error) {
+        // 추가 성공 시 DB에서 다시 불러오기 (가장 안전)
+        await loadPlayers();
+        input.value = '';
     } else {
-        // 화면에도 바로 추가 (새로고침 안 해도 되게)
-        createPlayerCard(data[0]);
-        input.value = ''; // 입력창 비우기
+        alert("추가 실패!");
     }
 }
 
-// ★ 선수 삭제 (쓰레기통) 기능
 function setupDeleteZone() {
     const deleteZone = document.getElementById('delete-zone');
+    if(!deleteZone) return;
 
-    // 드래그 진입 시 스타일 변경
     deleteZone.addEventListener('dragover', e => {
         e.preventDefault();
         deleteZone.classList.add('drag-over');
@@ -201,7 +221,6 @@ function setupDeleteZone() {
         deleteZone.classList.remove('drag-over');
     });
 
-    // 드롭 시 삭제 실행
     deleteZone.addEventListener('drop', async e => {
         e.preventDefault();
         deleteZone.classList.remove('drag-over');
@@ -209,27 +228,16 @@ function setupDeleteZone() {
         const draggingCard = document.querySelector('.dragging');
         if (!draggingCard) return;
 
-        const playerId = draggingCard.dataset.id;
-        const playerName = draggingCard.textContent;
+        if (confirm(`'${draggingCard.textContent}' 선수를 삭제하시겠습니까?`)) {
+            const playerId = draggingCard.dataset.id;
+            draggingCard.remove(); 
 
-        // 확인 창 띄우기
-        if (confirm(`'${playerName}' 선수를 정말 삭제하시겠습니까?`)) {
-            // 1. 화면에서 즉시 삭제
-            draggingCard.remove();
-
-            // 2. DB에서 영구 삭제
             const { error } = await supabase
                 .from('players')
                 .delete()
                 .eq('id', playerId);
-
-            if (error) {
-                alert("삭제 실패! (콘솔 확인)");
-                console.error(error);
-                loadPlayers(); // 실패하면 다시 불러와서 복구
-            } else {
-                // 성공 시 별도 알림 없이 깔끔하게 처리 (또는 alert("삭제됨") 추가 가능)
-            }
+                
+            if (error) await loadPlayers(); // 실패 시 복구
         }
     });
 }

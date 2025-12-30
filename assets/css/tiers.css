@@ -28,6 +28,8 @@
 .tier-header.c { background-color: var(--tier-c); }
 .tier-header.d { background-color: var(--tier-d); }
 .tier-header.f { background-color: var(--tier-f); }
+.tier-header.chicken { background-color: var(--tier-chicken); }
+.tier-header.stick { background-color: var(--tier-stick); }
 
 .tier-body {
     flex-grow: 1; padding: 10px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center;

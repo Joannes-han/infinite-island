@@ -1,32 +1,45 @@
 /* assets/css/style.css */
 
+/* 1. 기본 초기화 */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
-body {
-    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+/* 2. 브라우저 전체 설정 (스크롤 없애기) */
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden; /* ★ 핵심: 윈도우 전체 스크롤 방지 */
     background-color: var(--bg-main);
     color: var(--text-main);
-    height: 100vh;
-    overflow: hidden;
-    transition: background-color 0.3s, color 0.3s; /* 테마 변경 시 부드럽게 */
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+    transition: background-color 0.3s, color 0.3s;
 }
 
 a { text-decoration: none; color: inherit; transition: 0.3s; }
 ul { list-style: none; }
 
-.app-container { display: flex; height: 100vh; width: 100vw; }
+/* 3. 전체 레이아웃 (좌우 배치) */
+.app-container, .container { /* 호환성을 위해 두 클래스 다 지원 */
+    display: flex; 
+    width: 100%; 
+    height: 100vh; 
+}
 
-/* 사이드바 */
+/* =========================================
+   사이드바 (왼쪽 고정)
+   ========================================= */
 .sidebar {
-    width: var(--sidebar-width);
+    width: 260px; /* 고정 너비 (변수 대신 고정값 권장) */
+    width: var(--sidebar-width, 260px); /* 변수가 있다면 사용 */
+    height: 100%; /* 높이 꽉 채우기 */
     background-color: var(--bg-panel);
     border-right: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
     padding: 30px 20px;
-    flex-shrink: 0;
+    flex-shrink: 0; /* 화면이 좁아져도 찌그러지지 않음 */
     z-index: 100;
     transition: background-color 0.3s;
+    overflow-y: auto; /* 메뉴가 너무 많으면 사이드바만 스크롤 */
 }
 
 .sidebar-header {
@@ -34,11 +47,10 @@ ul { list-style: none; }
     text-align: center;
     border-bottom: 1px solid var(--border-color);
     padding-bottom: 20px;
+    flex-shrink: 0;
 }
 
-.brand-logo {
-    font-size: 24px; font-weight: 800; color: var(--accent-gold);
-}
+.brand-logo { font-size: 24px; font-weight: 800; color: var(--accent-gold); }
 
 .menu-list { flex-grow: 1; display: flex; flex-direction: column; gap: 10px; }
 
@@ -50,10 +62,7 @@ ul { list-style: none; }
 }
 .menu-item i { margin-right: 15px; width: 20px; text-align: center; }
 
-.menu-item:hover {
-    background-color: var(--bg-hover);
-    color: var(--text-main);
-}
+.menu-item:hover { background-color: var(--bg-hover); color: var(--text-main); }
 
 .menu-item.active {
     background-color: var(--accent-gold-dim);
@@ -61,22 +70,80 @@ ul { list-style: none; }
     border-left: 3px solid var(--accent-gold);
 }
 
-.sidebar-footer { text-align: center; font-size: 12px; color: var(--text-muted); margin-top: 20px; }
+.sidebar-footer { 
+    text-align: center; font-size: 12px; color: var(--text-muted); margin-top: 20px; flex-shrink: 0; 
+}
 
-/* 메인 콘텐츠 */
+/* 1. 테마 변경 버튼 디자인 */
+.theme-btn {
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 5px;
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 14px;
+    background-color: transparent; /* 배경 투명 */
+}
+
+.theme-btn:hover {
+    background-color: var(--bg-hover);
+    color: var(--text-main);
+}
+
+/* 2. 로그아웃 버튼 디자인 */
+.logout-btn-style {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px;
+    color: #e74c3c; /* 빨간색 */
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-radius: 6px;
+    text-decoration: none;
+}
+
+.logout-btn-style:hover {
+    background-color: rgba(231, 76, 60, 0.1); /* 연한 빨간 배경 */
+}
+
+/* 3. 하단 카피라이트 문구 */
+.footer-copy {
+    margin-top: 15px;
+    font-size: 11px;
+    color: var(--text-muted);
+    opacity: 0.6;
+}
+
+/* =========================================
+   메인 콘텐츠 (오른쪽 스크롤 영역)
+   ========================================= */
 .content-area {
-    flex-grow: 1; display: flex; flex-direction: column;
+    flex-grow: 1; 
+    display: flex; 
+    flex-direction: column;
+    height: 100%;      /* 높이 꽉 채우기 */
+    overflow-y: auto;  /* ★ 핵심: 내용이 넘치면 "여기만" 스크롤됨 */
     position: relative;
     background-color: var(--bg-main);
-    overflow: hidden;
     transition: background-color 0.3s;
 }
 
 .top-bar {
     padding: 20px 40px; display: flex; justify-content: space-between; align-items: center;
     border-bottom: 1px solid var(--border-color);
-    background-color: var(--bg-main); /* 탑바 배경 */
+    background-color: var(--bg-main); 
     height: 80px; flex-shrink: 0;
+    position: sticky; top: 0; z-index: 50; /* 스크롤 내려도 탑바는 위에 붙어있게 */
 }
 
 .page-title {
@@ -86,9 +153,16 @@ ul { list-style: none; }
     padding-left: 15px;
 }
 
-.page-content-container { padding: 30px 40px; flex-grow: 1; overflow-y: auto; }
+.page-content-container { 
+    padding: 30px 40px; 
+    flex-grow: 1; 
+    /* 여기서 overflow 설정을 빼야 이중 스크롤이 안 생깁니다. 
+       이미 .content-area가 스크롤을 담당하니까요. */
+}
 
-/* 대시보드 스타일 */
+/* =========================================
+   대시보드 / 카드 디자인 (기존 스타일 유지)
+   ========================================= */
 .dashboard-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; padding-bottom: 50px; }
 
 .dash-card {
@@ -131,61 +205,25 @@ ul { list-style: none; }
 .no-data { color: var(--text-muted); font-size: 14px; }
 .date-display { color: var(--text-muted); font-size: 14px; font-weight: 600; }
 
-/* === 최다 우승자(MVP) 카드 === */
-.mvp-card {
-    border: 1px solid var(--accent-gold);
-    background: linear-gradient(145deg, var(--bg-panel), rgba(238, 188, 81, 0.05));
-    position: relative;
-}
+/* MVP 카드 */
+.mvp-card { border: 1px solid var(--accent-gold); background: linear-gradient(145deg, var(--bg-panel), rgba(238, 188, 81, 0.05)); position: relative; }
+.mvp-content { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.mvp-img-box { width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--accent-gold); box-shadow: 0 0 20px var(--accent-gold-dim); overflow: hidden; margin-bottom: 15px; background-color: var(--bg-main); display: flex; align-items: center; justify-content: center; }
+.mvp-img-box img { width: 100%; height: 100%; object-fit: cover; }
+.mvp-img-box i { font-size: 40px; color: var(--text-muted); }
+.mvp-name { font-size: 20px; font-weight: 800; color: var(--text-main); margin-bottom: 5px; }
+.mvp-count-badge { background-color: var(--accent-gold); color: #000; font-weight: bold; font-size: 14px; padding: 4px 12px; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
 
-.mvp-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
-
-/* MVP 프로필 사진 틀 */
-.mvp-img-box {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    border: 3px solid var(--accent-gold);
-    box-shadow: 0 0 20px var(--accent-gold-dim);
-    overflow: hidden;
-    margin-bottom: 15px;
-    background-color: var(--bg-main);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.mvp-img-box img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.mvp-img-box i {
-    font-size: 40px;
-    color: var(--text-muted);
-}
-
-/* 텍스트 정보 */
-.mvp-name {
-    font-size: 20px;
-    font-weight: 800;
-    color: var(--text-main);
-    margin-bottom: 5px;
-}
-
-.mvp-count-badge {
-    background-color: var(--accent-gold);
-    color: #000;
-    font-weight: bold;
-    font-size: 14px;
-    padding: 4px 12px;
-    border-radius: 20px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-}
+/* 팝업 스타일 */
+.popup-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); display: flex; justify-content: center; align-items: center; z-index: 9999; backdrop-filter: blur(5px); }
+.popup-content { background: #1e1e24; width: 90%; max-width: 500px; border-radius: 15px; border: 1px solid #444; box-shadow: 0 15px 30px rgba(0,0,0,0.5); overflow: hidden; animation: popUp 0.3s ease-out; }
+@keyframes popUp { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.popup-header { background: linear-gradient(135deg, #f39c12, #d35400); padding: 15px 20px; color: white; font-weight: bold; font-size: 1.2rem; }
+.popup-body { padding: 25px; color: #fff; font-size: 1rem; line-height: 1.6; text-align: center; }
+.popup-footer { padding: 15px 20px; background: #15151a; display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid #333; }
+.popup-footer button { padding: 8px 16px; border-radius: 6px; cursor: pointer; border: none; font-weight: bold; }
+.btn-primary { background: #f39c12; color: white; }
+.btn-primary:hover { background: #e67e22; }
+.btn-secondary { background: transparent; color: #888; border: 1px solid #444; }
+.btn-secondary:hover { color: #ccc; border-color: #666; }
+@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }

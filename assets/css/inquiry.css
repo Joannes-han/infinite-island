@@ -1,0 +1,267 @@
+/* 1. 최상위 부모 스크롤 강제 제거 */
+html, body {
+    height: 100vh !important;
+    overflow: hidden !important;
+    margin: 0; padding: 0;
+}
+
+/* 2. 앱 전체 컨테이너 */
+.app-container {
+    height: 100vh !important;
+    overflow: hidden !important;
+    display: flex;
+}
+
+/* 3. ★ 핵심 원인 차단 ★ 
+   보통 메인 영역(.content-area)이 스크롤되도록 설정되어 있을 텐데, 
+   이 페이지에서만 그걸 강제로 끕니다. */
+.content-area {
+    height: 100vh !important;
+    overflow: hidden !important; /* 부모 스크롤 차단 */
+    display: flex;
+    flex-direction: column;
+}
+
+/* 4. 페이지 내부 컨테이너 레이아웃 */
+.page-content-container {
+    flex: 1; /* 남은 공간 채우기 */
+    height: 100%; 
+    display: flex;
+    flex-direction: column;
+    overflow: hidden !important; /* 여기도 스크롤 차단 */
+    padding-bottom: 20px;
+    box-sizing: border-box;
+}
+
+/* 5. 상단 제목 & 탭 (고정 영역) */
+.top-bar {
+    flex-shrink: 0; 
+    margin-bottom: 10px;
+}
+
+.tab-menu {
+    flex-shrink: 0;
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    width: 100%;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 15px;
+    background: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex; justify-content: center; align-items: center; gap: 10px;
+}
+.tab-btn:hover { background: var(--bg-hover); color: var(--text-main); }
+.tab-btn.active { background: var(--accent-gold); color: #000; border-color: var(--accent-gold); }
+
+/* 6. 문의 컨테이너 (남은 공간 모두 차지) */
+.inquiry-container {
+    flex: 1; 
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: 0; /* ★ Flex 내부 스크롤 필수 설정 */
+    overflow: hidden !important;
+}
+
+/* 7. 박스 스타일 (화면 꽉 채우기) */
+.write-box, .history-box {
+    flex: 1; /* 높이 100% 차지 */
+    display: flex;
+    flex-direction: column;
+    min-height: 0; /* ★ 필수 */
+    
+    background: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    overflow: hidden !important; /* 박스 자체 스크롤 차단 */
+}
+
+/* 박스 내부 헤더 (고정) */
+.box-header {
+    flex-shrink: 0;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 15px;
+}
+.box-header h3 { margin: 0; color: var(--accent-gold); font-size: 1.4rem; }
+.sub-text { margin: 8px 0 0; color: var(--text-muted); font-size: 0.95rem; }
+.flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+/* 8. ★ 여기가 진짜 스크롤 되는 영역 (내부 스크롤) ★ */
+.form-body, .list-body {
+    flex: 1; /* 남은 공간 다 차지 */
+    overflow-y: auto !important; /* ★ 강제 스크롤 생성 */
+    padding-right: 10px; 
+    height: 100%; /* 높이 명시 */
+}
+
+/* --- 디자인 요소 --- */
+.input-group { margin-bottom: 20px; }
+.input-group label { display: block; margin-bottom: 8px; font-weight: bold; color: var(--text-main); font-size: 1.1rem; }
+.inp-field, .inp-area {
+    width: 100%; padding: 14px;
+    background: var(--bg-input); border: 1px solid var(--border-color);
+    border-radius: 8px; color: var(--text-main); font-size: 1.05rem;
+    box-sizing: border-box;
+}
+.inp-field:focus, .inp-area:focus { outline: none; border-color: var(--accent-gold); }
+select.inp-field {
+    cursor: pointer; appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat; background-position: right 15px center; background-size: 18px;
+}
+
+.btn-send {
+    width: 100%; padding: 16px; background: var(--accent-gold);
+    color: #000; font-weight: bold; border: none; border-radius: 8px;
+    cursor: pointer; font-size: 1.1rem; transition: 0.2s; margin-top: 10px; flex-shrink: 0;
+}
+.btn-send:hover { transform: translateY(-2px); opacity: 0.9; }
+
+.btn-refresh {
+    background: transparent; border: 1px solid var(--border-color);
+    color: var(--text-muted); padding: 8px 14px; border-radius: 6px; cursor: pointer;
+}
+.btn-refresh:hover { color: var(--text-main); border-color: var(--text-main); }
+
+.inq-card {
+    background: rgba(0,0,0,0.2); border: 1px solid var(--border-color);
+    border-radius: 12px; padding: 25px; position: relative; margin-bottom: 15px; flex-shrink: 0;
+}
+.inq-card.status-completed { border-left: 5px solid #2ed573; }
+.inq-card.status-pending { border-left: 5px solid #e74c3c; }
+
+.card-top { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 0.95rem; color: var(--text-muted); }
+.writer { font-weight: bold; color: var(--text-main); font-size: 1.1rem; }
+.category-badge {
+    background: var(--bg-hover); color: var(--accent-gold);
+    padding: 3px 6px; border-radius: 4px; font-size: 0.85rem; margin-right: 6px; font-weight: bold;
+}
+.badge { padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 0.85rem; }
+.badge.wait { background: rgba(231,76,60,0.1); color: #e74c3c; }
+.badge.done { background: rgba(46,213,115,0.1); color: #2ed573; }
+
+.question-text { line-height: 1.6; color: var(--text-main); white-space: pre-wrap; font-size: 1.05rem; }
+.answer-box {
+    margin-top: 20px; padding-top: 20px; border-top: 1px dashed var(--border-color);
+    background: rgba(46, 213, 115, 0.05); padding: 15px; border-radius: 8px;
+}
+.admin-title { color: #2ed573; font-weight: bold; font-size: 1rem; margin-bottom: 8px; display: block; }
+.answer-text { color: var(--text-main); line-height: 1.5; white-space: pre-wrap; font-size: 1.05rem; }
+
+/* 스크롤바 디자인 */
+.list-body::-webkit-scrollbar, .form-body::-webkit-scrollbar { width: 8px; }
+.list-body::-webkit-scrollbar-thumb, .form-body::-webkit-scrollbar-thumb {
+    background: #444; border-radius: 4px;
+}
+.list-body::-webkit-scrollbar-track, .form-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+/* 스크롤바 */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-main); }
+::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* --- [수정] 문의 카드 스타일 (클릭 가능하게 변경) --- */
+.inq-card {
+    background: rgba(0,0,0,0.2); 
+    border: 1px solid var(--border-color);
+    border-radius: 12px; 
+    padding: 0; /* 패딩을 내부로 이동 */
+    position: relative; 
+    margin-bottom: 15px; 
+    flex-shrink: 0;
+    transition: background 0.2s;
+}
+.inq-card:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.inq-card.status-completed { border-left: 5px solid #2ed573; }
+.inq-card.status-pending { border-left: 5px solid #e74c3c; }
+
+/* 1. 헤더 (항상 보이는 부분: 클릭 영역) */
+.card-header-area {
+    padding: 20px 25px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-left {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.header-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+/* 화살표 아이콘 */
+.toggle-icon {
+    color: var(--text-muted);
+    transition: transform 0.3s ease;
+}
+/* 카드가 활성화(active)되면 화살표 회전 */
+.inq-card.active .toggle-icon {
+    transform: rotate(180deg);
+}
+
+/* 2. 상세 내용 (평소엔 숨김) */
+.inq-detail-area {
+    display: none; /* 기본 숨김 */
+    padding: 0 25px 25px 25px; /* 위쪽 패딩 제외 */
+    border-top: 1px solid rgba(255,255,255,0.05);
+    margin-top: 5px;
+    padding-top: 20px;
+    animation: slideDown 0.2s ease-out;
+}
+
+/* 활성화되면 보임 */
+.inq-card.active .inq-detail-area {
+    display: block;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* 기존 스타일 유지 및 다듬기 */
+.writer { font-weight: bold; color: var(--text-main); font-size: 1.1rem; }
+.category-badge {
+    background: var(--bg-hover); color: var(--accent-gold);
+    padding: 3px 6px; border-radius: 4px; font-size: 0.85rem; font-weight: bold;
+}
+.badge { padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 0.85rem; }
+.badge.wait { background: rgba(231,76,60,0.1); color: #e74c3c; }
+.badge.done { background: rgba(46,213,115,0.1); color: #2ed573; }
+
+.question-text { line-height: 1.6; color: var(--text-main); white-space: pre-wrap; font-size: 1.05rem; }
+
+.answer-box {
+    margin-top: 20px; padding-top: 20px; border-top: 1px dashed var(--border-color);
+    background: rgba(46, 213, 115, 0.05); padding: 15px; border-radius: 8px;
+}
+.admin-title { color: #2ed573; font-weight: bold; font-size: 1rem; margin-bottom: 8px; display: block; }
+.answer-text { color: var(--text-main); line-height: 1.5; white-space: pre-wrap; font-size: 1.05rem; }
+

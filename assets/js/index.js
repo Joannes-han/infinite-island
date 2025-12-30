@@ -1,5 +1,6 @@
 import { supabase } from './supabase.js';
 
+
 document.addEventListener('DOMContentLoaded', () => {
     // 날짜 표시
     const today = new Date();
