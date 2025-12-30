@@ -42,7 +42,7 @@ function createTeamSlot(teamNum) {
     setupDropZone(teamDiv.querySelector('.team-slots'));
 }
 
-// 2. 데이터 불러오기 (명예 기능 제거됨)
+// 2. 데이터 불러오기
 async function loadDraftData() {
     const { data, error } = await supabase
         .from('players')
@@ -84,7 +84,6 @@ function renderPlayers() {
         let targetPool = document.getElementById(`pool-${tierKey}`);
 
         if (!targetPool) {
-            // console.warn(`박스 없음: ${tierKey}`); // 디버깅용
             targetPool = document.getElementById('pool-unranked');
         }
 
@@ -230,121 +229,7 @@ function swapPlayersInMemory(playerA_Id, playerB_Id) {
     renderPlayers();
 }
 
-async function saveTeamsToDB() {
-    const btn = document.getElementById('saveTeamsBtn');
-    const originalText = btn.innerHTML;
-    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 저장 중...';
-    btn.disabled = true;
-
-    try {
-        await supabase.from('players').update({ team_id: null }).neq('id', 0);
-
-        const updates = [];
-        allPlayers.forEach(p => {
-            if (p.team_id !== null && p.team_id >= 1 && p.team_id <= currentTeamCount) {
-                updates.push(
-                    supabase.from('players').update({ team_id: p.team_id }).eq('id', p.id)
-                );
-            }
-        });
-
-        if (updates.length > 0) {
-            await Promise.all(updates);
-        }
-        alert("✅ 팀 배치가 저장되었습니다!");
-    } catch (err) {
-        console.error(err);
-        alert("저장 중 오류가 발생했습니다.");
-    } finally {
-        btn.innerHTML = originalText;
-        btn.disabled = false;
-    }
-}
-
-function runAutoDraft() {
-    if (!allPlayers || allPlayers.length === 0) return alert("배정할 선수가 없습니다.");
-    if (!confirm(`현재 대기 중인 ${allPlayers.length}명의 선수를\n자동으로 배정하시겠습니까?`)) return;
-
-    const totalPlayers = allPlayers.length;
-    const optimalTeamCount = Math.floor(totalPlayers / 3) || 1;
-
-    const container = document.getElementById('teams-container');
-    container.innerHTML = '';
-    
-    // ★ [수정 2] 자동 배정 시 팀 개수 변경 및 저장
-    currentTeamCount = optimalTeamCount;
-    localStorage.setItem('draftTeamCount', currentTeamCount);
-
-    for (let i = 1; i <= currentTeamCount; i++) {
-        createTeamSlot(i);
-    }
-
-    allPlayers.forEach(p => p.team_id = null);
-
-    let sortedPlayers = shuffleArray([...allPlayers]);
-    sortedPlayers.sort((a, b) => b.cost - a.cost);
-
-    const teamStatus = [];
-    for (let i = 1; i <= currentTeamCount; i++) {
-        teamStatus.push({ id: i, currentCost: 0, membersCount: 0 });
-    }
-
-    for (const player of sortedPlayers) {
-        const availableTeams = teamStatus.filter(t => t.membersCount < MAX_PLAYERS_PER_TEAM);
-        if (availableTeams.length === 0) break;
-
-        availableTeams.sort((a, b) => a.currentCost - b.currentCost);
-        const minCost = availableTeams[0].currentCost;
-        const candidates = availableTeams.filter(t => t.currentCost === minCost);
-        const targetTeam = candidates[Math.floor(Math.random() * candidates.length)];
-
-        player.team_id = targetTeam.id;
-        targetTeam.currentCost += (player.cost || 0);
-        targetTeam.membersCount += 1;
-    }
-
-    renderPlayers();
-}
-
-// ★★★ [가장 중요] 팀 확정 저장 함수 (DB 전체 갱신) ★★★
-async function saveTeamsToDB() {
-    const btn = document.getElementById('saveTeamsBtn');
-    const originalText = btn.innerHTML;
-    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 저장 중...';
-    btn.disabled = true;
-
-    try {
-        // 1. 유령 데이터 방지를 위해 일단 모든 선수의 팀 정보를 초기화(NULL)
-        await supabase.from('players').update({ team_id: null }).neq('id', 0);
-
-        // 2. 현재 화면(메모리)에 배치된 선수들의 정보만 모음
-        const updates = [];
-        allPlayers.forEach(p => {
-            // 팀에 소속된 선수만 업데이트 대상
-            if (p.team_id !== null && p.team_id >= 1 && p.team_id <= currentTeamCount) {
-                updates.push(
-                    supabase.from('players').update({ team_id: p.team_id }).eq('id', p.id)
-                );
-            }
-        });
-
-        // 3. 실제 DB 업데이트 실행 (병렬 처리)
-        if (updates.length > 0) {
-            await Promise.all(updates);
-        }
-
-        //alert("✅ 팀 배치가 저장되었습니다! 점수판에서 확인하세요.");
-
-    } catch (err) {
-        console.error(err);
-        alert("저장 중 오류가 발생했습니다.");
-    } finally {
-        btn.innerHTML = originalText;
-        btn.disabled = false;
-    }
-}
-
-// 자동 배정 (메모리만 변경)
+// 자동 배정 (메모리만 변경) - ★ 중복 제거 후 하나만 남김
 function runAutoDraft() {
     if (!allPlayers || allPlayers.length === 0) return alert("배정할 선수가 없습니다.");
     if (!confirm(`현재 대기 중인 ${allPlayers.length}명의 선수를\n자동으로 배정하시겠습니까?`)) return;
@@ -355,7 +240,11 @@ function runAutoDraft() {
     
     const container = document.getElementById('teams-container');
     container.innerHTML = '';
+    
+    // ★ [수정 2] 자동 배정 시 팀 개수 변경 및 저장
     currentTeamCount = optimalTeamCount;
+    localStorage.setItem('draftTeamCount', currentTeamCount);
+
     for (let i = 1; i <= currentTeamCount; i++) {
         createTeamSlot(i);
     }
@@ -388,7 +277,44 @@ function runAutoDraft() {
 
     // 4. 화면 반영
     renderPlayers(); 
-    
+}
+
+// ★★★ [가장 중요] 팀 확정 저장 함수 (DB 전체 갱신) ★★★
+async function saveTeamsToDB() {
+    const btn = document.getElementById('saveTeamsBtn');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 저장 중...';
+    btn.disabled = true;
+
+    try {
+        // 1. 유령 데이터 방지를 위해 일단 모든 선수의 팀 정보를 초기화(NULL)
+        await supabase.from('players').update({ team_id: null }).neq('id', 0);
+
+        // 2. 현재 화면(메모리)에 배치된 선수들의 정보만 모음
+        const updates = [];
+        allPlayers.forEach(p => {
+            // 팀에 소속된 선수만 업데이트 대상
+            if (p.team_id !== null && p.team_id >= 1 && p.team_id <= currentTeamCount) {
+                updates.push(
+                    supabase.from('players').update({ team_id: p.team_id }).eq('id', p.id)
+                );
+            }
+        });
+
+        // 3. 실제 DB 업데이트 실행 (병렬 처리)
+        if (updates.length > 0) {
+            await Promise.all(updates);
+        }
+
+        alert("✅ 팀 배치가 저장되었습니다! 점수판에서 확인하세요.");
+
+    } catch (err) {
+        console.error(err);
+        alert("저장 중 오류가 발생했습니다.");
+    } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
 }
 
 // 유틸리티
