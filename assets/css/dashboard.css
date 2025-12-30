@@ -1,0 +1,254 @@
+/* =========================================
+   1. 대시보드 전용 스타일
+   (색상은 theme.css의 변수를 가져와서 씁니다)
+   ========================================= */
+
+/* 전체 레이아웃 */
+.content-area {
+    padding: 30px 40px;
+    background-color: var(--bg-main); /* 글로벌 배경색 사용 */
+    height: 100vh;
+    overflow-y: auto;
+    box-sizing: border-box;
+    color: var(--text-main); /* 글로벌 텍스트색 사용 */
+    transition: background-color 0.3s, color 0.3s;
+}
+
+/* 2. 헤더 스타일 */
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 25px;
+}
+
+.page-title {
+    font-size: 2rem;
+    font-weight: 800;
+    margin: 0;
+    /* 테마에 따라 자연스럽게 어울리는 그라데이션 */
+    background: linear-gradient(to right, var(--text-main), var(--text-muted));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.current-date {
+    margin: 5px 0 0;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+/* 시계 스타일 */
+.digital-clock {
+    font-family: 'Courier New', monospace;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--text-main);
+    background: var(--bg-input); /* 입력창 배경색 활용 */
+    padding: 5px 15px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+/* 상태 뱃지 (Live - 빨간색은 고정) */
+.status-pill {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.status-pill.live .pulse-dot {
+    width: 8px; height: 8px;
+    background: #ef4444;
+    border-radius: 50%;
+    animation: pulseRed 1.5s infinite;
+}
+@keyframes pulseRed {
+    0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+/* 3. 벤토 그리드 레이아웃 */
+.bento-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: 140px auto auto;
+    gap: 20px;
+    max-width: 1600px;
+}
+
+/* 카드 공통 스타일 (글로벌 변수 적용) */
+.card {
+    background: var(--bg-panel); /* 패널 배경색 */
+    border: 1px solid var(--border-color); /* 테두리 색 */
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.card:hover {
+    background: var(--bg-hover); /* 호버 색상 */
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.card-header {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.card-header i { color: var(--accent-gold); }
+
+/* 그리드 병합 클래스 */
+.span-2-col { grid-column: span 2; }
+.span-2-row { grid-row: span 2; }
+
+/* [A] 상단 스탯 카드 내부 */
+.stat-card .card-body {
+    flex: 1;
+    display: flex;
+    align-items: center;
+}
+/* renderStats에서 생성되는 요소 강제 스타일링 */
+.stat-name { font-size: 1.1rem !important; color: var(--text-main) !important; }
+.stat-value { font-size: 1.8rem !important; font-weight: 800 !important; color: var(--accent-gold) !important; margin-left: auto; }
+
+/* [B] 랭킹 테이블 */
+.table-wrapper {
+    overflow-y: auto;
+    flex: 1;
+}
+.modern-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.modern-table th {
+    text-align: left;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    padding: 10px 15px;
+    border-bottom: 1px solid var(--border-color);
+}
+.modern-table td {
+    padding: 18px 15px;
+    border-bottom: 1px solid var(--border-color); /* 구분선도 변수로 */
+    font-size: 1rem;
+    color: var(--text-main);
+}
+.modern-table tr:hover td {
+    background: var(--bg-hover);
+}
+.modern-table tr:last-child td { border-bottom: none; }
+
+/* 랭킹 1,2,3위 강조 색상은 유지 (테마 상관없이 고정) */
+.rank-1 td:first-child { color: #FFD700; font-weight: bold; }
+.rank-2 td:first-child { color: #C0C0C0; font-weight: bold; }
+.rank-3 td:first-child { color: #CD7F32; font-weight: bold; }
+
+/* [C] 최근 우승자 카드 (포인트 카드) */
+.winner-card {
+    /* 여기는 강조를 위해 살짝 투명도를 섞은 배경 사용 */
+    background: var(--bg-panel);
+    border: 1px solid var(--accent-gold); /* 금색 테두리 포인트 */
+}
+
+/* 글로우 효과는 라이트모드에선 은은하게, 다크모드에선 선명하게 */
+.card-bg-glow {
+    position: absolute;
+    top: -50px; right: -50px;
+    width: 150px; height: 150px;
+    background: var(--accent-gold);
+    filter: blur(80px);
+    opacity: 0.15;
+}
+
+.winner-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+}
+
+/* [D] 포디움 리스트 */
+.podium-mini-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.podium-row {
+    display: flex;
+    align-items: center;
+    background: var(--bg-input); /* 입력창 배경색 활용 (연한 배경) */
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+.p-rank {
+    width: 24px; height: 24px;
+    background: var(--border-color); /* 순위 배경 */
+    color: var(--text-muted);
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: bold; font-size: 0.8rem;
+    margin-right: 10px;
+}
+/* 1위만 금색 배경 */
+.p-rank.r-1 { background: var(--accent-gold); color: #000; }
+
+.p-info { flex: 1; display: flex; flex-direction: column; }
+.p-team { font-weight: bold; font-size: 0.95rem; color: var(--text-main); }
+.p-score { font-weight: 800; color: var(--text-main); }
+
+/* 로딩 스피너 색상도 텍스트 색 따라가게 */
+.loading-spinner {
+    border: 3px solid var(--bg-input);
+    border-top: 3px solid var(--accent-gold);
+    /* ... 나머지 스피너 CSS는 style.css에 있다면 생략 가능 */
+    border-radius: 50%;
+    width: 30px; height: 30px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+}
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+/* 새로고침 버튼 호버 효과 */
+.refresh-badge {
+    transition: all 0.2s;
+    user-select: none; /* 글자 드래그 방지 */
+}
+
+.refresh-badge:hover {
+    color: var(--text-main); /* 마우스 올리면 글자색 밝게 */
+    background: rgba(255, 255, 255, 0.1); /* 배경 살짝 깔아줌 */
+    padding: 2px 8px; /* 배경 생기니까 여백 줌 */
+    border-radius: 4px;
+}
+
+.refresh-badge:active {
+    transform: scale(0.95); /* 클릭 시 살짝 눌리는 느낌 */
+}

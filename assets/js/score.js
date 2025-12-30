@@ -1,10 +1,17 @@
 import { supabase } from './supabase.js';
+// ★ 테마 매니저 연결 (index.html과 동일하게)
+import { initTheme, setupThemeToggle } from './theme-manager.js';
 
 let teamsMap = {};
-let scoresData = [];
+let scoresData = []; // 'match_scores' 테이블 데이터를 담을 곳
 let maxRound = 3; // 기본 3라운드
 
 document.addEventListener('DOMContentLoaded', () => {
+    // 1. 테마 기능 실행
+    initTheme();
+    setupThemeToggle();
+
+    // 2. 점수판 초기화
     initScoreBoard();
     setupEvents();
 });
@@ -13,12 +20,12 @@ async function initScoreBoard() {
     await loadTeams();
     await loadScores();
 
-    // 초기 렌더링: 입력판(고정)과 순위표(정렬) 둘 다 그리기
+    // 입력판(오른쪽)과 순위표(왼쪽) 그리기
     renderInputTable();
     renderLeaderboard();
 }
 
-// 1. 팀 정보 가져오기
+// 1. 팀 정보 가져오기 (players 테이블)
 async function loadTeams() {
     const { data: players, error } = await supabase
         .from('players')
@@ -27,27 +34,26 @@ async function loadTeams() {
 
     if (error) return console.error(error);
 
-    // ★ 1. 티어 가중치 정의 (높을수록 점수가 큼)
+    // 티어 가중치 (정렬용)
     const tierWeight = {
         'SSS': 10, 'SS': 9, 'S': 8, 'A': 7,
         'B': 6, 'C': 5, 'D': 4, 'F': 3,
-        'UNRANKED': 0
+        'UNRANKED': 0, '닭': 0, '나뭇가지': -1
     };
 
-    // ★ 2. 선수 정렬 (티어 높은 순 -> 이름 순)
+    // 선수 정렬 (티어 높은 순 -> 이름 순)
     players.sort((a, b) => {
-        // 티어가 없으면 'UNRANKED'로 취급
         const tierA = tierWeight[(a.tier || 'UNRANKED').toUpperCase()] || 0;
         const tierB = tierWeight[(b.tier || 'UNRANKED').toUpperCase()] || 0;
 
         if (tierA !== tierB) {
-            return tierB - tierA; // 티어 점수 내림차순 (높은게 먼저)
+            return tierB - tierA;
         } else {
-            return a.name.localeCompare(b.name); // 티어 같으면 이름순
+            return a.name.localeCompare(b.name);
         }
     });
 
-    // 3. 정렬된 순서대로 팀에 넣기
+    // 팀별로 묶기
     teamsMap = {};
     players.forEach(p => {
         if (!teamsMap[p.team_id]) {
@@ -57,17 +63,25 @@ async function loadTeams() {
     });
 }
 
-// 2. 점수 데이터 가져오기
+// 2. 점수 데이터 가져오기 (match_scores 테이블)
 async function loadScores() {
-    const { data, error } = await supabase.from('scores').select('*');
-    if (error) return console.error(error);
+    // ★ [수정] DB의 'match_scores' 테이블에서 가져옵니다.
+    const { data, error } = await supabase
+        .from('match_scores')
+        .select('*');
+        
+    if (error) {
+        console.error("점수 로딩 실패:", error);
+        return;
+    }
 
     scoresData = data;
 
-    // DB에 저장된 최대 라운드 확인
+    // DB에 저장된 최대 라운드 확인 (데이터가 있으면 라운드 수 자동 확장)
     let dbMaxRound = 0;
-    data.forEach(s => { if (s.round > dbMaxRound) dbMaxRound = s.round; });
-    // 최소 3라운드 보장
+    data.forEach(s => { if (s.round_num > dbMaxRound) dbMaxRound = s.round_num; });
+    
+    // 최소 3라운드는 유지
     maxRound = Math.max(dbMaxRound, 3);
 }
 
@@ -78,6 +92,8 @@ async function loadScores() {
 function renderInputTable() {
     const tbody = document.getElementById('inputBody');
     const headerRow = document.getElementById('inputTableHeader');
+
+    if (!tbody || !headerRow) return;
 
     // 헤더 라운드(R1, R2...) 갱신
     headerRow.querySelectorAll('.col-round').forEach(el => el.remove());
@@ -97,8 +113,10 @@ function renderInputTable() {
         // 현재 총점 계산
         let total = 0;
         const roundScores = {};
+        
+        // 내 팀의 점수만 필터링
         scoresData.filter(s => s.team_id === team.id).forEach(s => {
-            roundScores[s.round] = s.score;
+            roundScores[s.round_num] = s.score;
             total += s.score;
         });
 
@@ -115,8 +133,8 @@ function renderInputTable() {
         for (let r = 1; r <= maxRound; r++) {
             const score = roundScores[r] || 0;
             const td = document.createElement('td');
-            // value가 0이면 빈칸으로 표시하려면: value="${score == 0 ? '' : score}"
-            // 여기서는 0도 표시하도록 함
+            
+            // 입력칸 (값이 바뀔 때마다 DB 저장)
             td.innerHTML = `
                 <input type="number" class="score-input" 
                     data-team="${team.id}" data-round="${r}" 
@@ -128,7 +146,7 @@ function renderInputTable() {
         tbody.appendChild(tr);
     });
 
-    // 입력 이벤트 연결 ('change' 이벤트 사용)
+    // 입력 이벤트 연결 ('change' 사용: 입력 후 엔터 치거나 포커스 잃으면 저장)
     document.querySelectorAll('.score-input').forEach(input => {
         input.addEventListener('change', handleScoreChange);
     });
@@ -140,6 +158,7 @@ function renderInputTable() {
 // ============================================================
 function renderLeaderboard() {
     const tbody = document.getElementById('leaderboardBody');
+    if (!tbody) return;
     tbody.innerHTML = '';
 
     // 랭킹 리스트 생성
@@ -154,8 +173,10 @@ function renderLeaderboard() {
     rankingList.sort((a, b) => b.total - a.total || a.id - b.id);
 
     // 체크포인트 설정 값 확인
-    const isCpEnabled = document.getElementById('checkpointToggle').checked;
-    const cpTarget = parseInt(document.getElementById('checkpointTarget').value) || 50;
+    const toggle = document.getElementById('checkpointToggle');
+    const isCpEnabled = toggle ? toggle.checked : false;
+    const targetInput = document.getElementById('checkpointTarget');
+    const cpTarget = targetInput ? (parseInt(targetInput.value) || 50) : 50;
 
     // 체크포인트 헤더 보이기/숨기기
     const cpHeader = document.querySelector('.section-leaderboard .col-check');
@@ -190,7 +211,7 @@ function renderLeaderboard() {
 
 
 // ============================================================
-// ★ 3. 점수 변경 핸들러 (입력판 포커스 유지 + 순위표만 갱신)
+// ★ 3. 점수 변경 핸들러 (DB 실시간 저장)
 // ============================================================
 async function handleScoreChange(e) {
     const input = e.target;
@@ -201,143 +222,168 @@ async function handleScoreChange(e) {
     const inputValue = input.value.trim();
     const newScore = inputValue === '' ? 0 : parseInt(inputValue);
 
-    // 1. DB 업데이트 (Upsert 로직 대체)
-    const existingIndex = scoresData.findIndex(s => s.team_id === teamId && s.round === round);
+    // 로컬 데이터에서 해당 기록 찾기
+    const existingIndex = scoresData.findIndex(s => s.team_id === teamId && s.round_num === round);
 
-    if (existingIndex >= 0) {
-        // 이미 점수가 있으면 Update
-        const id = scoresData[existingIndex].id;
-        await supabase.from('scores').update({ score: newScore }).eq('id', id);
-        scoresData[existingIndex].score = newScore; // 로컬 데이터 갱신
-    } else {
-        // 점수가 없으면 Insert
-        const { data, error } = await supabase
-            .from('scores')
-            .insert([{ team_id: teamId, round: round, score: newScore }])
-            .select();
+    try {
+        if (existingIndex >= 0) {
+            // ★ 이미 있으면 UPDATE
+            const recordId = scoresData[existingIndex].id;
+            
+            // 화면 반응 속도를 위해 로컬 데이터 먼저 갱신
+            scoresData[existingIndex].score = newScore;
 
-        if (!error && data) {
-            scoresData.push(data[0]); // 로컬 데이터 추가
+            await supabase
+                .from('match_scores')
+                .update({ score: newScore })
+                .eq('id', recordId);
+                
+        } else {
+            // ★ 없으면 INSERT (새 데이터)
+            const { data, error } = await supabase
+                .from('match_scores')
+                .insert([{ team_id: teamId, round_num: round, score: newScore }])
+                .select();
+
+            if (error) throw error;
+
+            if (data) {
+                scoresData.push(data[0]); // 로컬 데이터에 추가
+            }
         }
+
+        // 2. [오른쪽] 합계 미리보기 갱신
+        let currentTeamTotal = 0;
+        scoresData.filter(s => s.team_id === teamId).forEach(s => currentTeamTotal += s.score);
+
+        const totalCell = document.getElementById(`preview-total-${teamId}`);
+        if (totalCell) totalCell.textContent = currentTeamTotal;
+
+        // 3. [왼쪽] 순위표 전체 다시 그리기 (순위 변동 반영)
+        renderLeaderboard();
+
+    } catch (err) {
+        console.error("점수 저장 실패:", err);
+        // 실패 시 사용자에게 알림 (선택 사항)
+        // alert("저장에 실패했습니다. 인터넷 연결을 확인하세요.");
     }
-
-    // 2. [오른쪽] 입력판의 '합계' 컬럼 숫자만 쏙 바꿈 (테이블 전체 리렌더링 X -> 포커스 유지됨)
-    let currentTeamTotal = 0;
-    scoresData.filter(s => s.team_id === teamId).forEach(s => currentTeamTotal += s.score);
-
-    const totalCell = document.getElementById(`preview-total-${teamId}`);
-    if (totalCell) totalCell.textContent = currentTeamTotal;
-
-    // 3. [왼쪽] 순위표는 전체 다시 그리기 (순위 변동 반영)
-    renderLeaderboard();
 }
 
 function setupEvents() {
-    // 라운드 추가
-    document.getElementById('addRoundBtn').addEventListener('click', () => {
-        maxRound++;
-        renderInputTable();
-    });
-
-    // 새로고침 (단순 리로드)
-    document.getElementById('refreshBtn').addEventListener('click', () => {
-        if (confirm("데이터를 새로고침 하시겠습니까?")) initScoreBoard();
-    });
-
-    // ★ 추가된 기능: 점수 초기화 (전체 삭제)
-    document.getElementById('resetMatchBtn').addEventListener('click', async () => {
-
-        // 1. DB에서 모든 점수 삭제
-        // (id가 0이 아닌 모든 행을 삭제 = 전체 삭제)
-        const { error } = await supabase
-            .from('scores')
-            .delete()
-            .neq('id', 0);
-
-        if (error) {
-            console.error(error);
-            alert("초기화 실패! (콘솔 확인)");
-        } else {
-            // 2. 로컬 데이터 초기화
-            scoresData = [];
-            maxRound = 3; // 라운드도 기본 3으로 리셋
-
-            // 3. 화면 다시 그리기
+    // 라운드 추가 버튼
+    const addRoundBtn = document.getElementById('addRoundBtn');
+    if(addRoundBtn) {
+        addRoundBtn.addEventListener('click', () => {
+            maxRound++;
             renderInputTable();
-            renderLeaderboard();
-        }
-    });
+        });
+    }
+
+    // 새로고침 버튼
+    const refreshBtn = document.getElementById('refreshBtn');
+    if(refreshBtn) {
+        refreshBtn.addEventListener('click', () => {
+            // if (confirm("데이터를 새로고침 하시겠습니까?")) 
+            initScoreBoard();
+        });
+    }
+
+    // ★ 점수 초기화 (DB 전체 삭제)
+    const resetBtn = document.getElementById('resetMatchBtn');
+    if(resetBtn) {
+        resetBtn.addEventListener('click', async () => {
+            if (!confirm("정말 모든 점수 데이터를 초기화하시겠습니까?\n(되돌릴 수 없습니다!)")) return;
+
+            const { error } = await supabase
+                .from('match_scores')
+                .delete()
+                .neq('id', 0); // 전체 삭제
+
+            if (error) {
+                console.error(error);
+                alert("초기화 실패!");
+            } else {
+                scoresData = [];
+                maxRound = 3;
+                renderInputTable();
+                renderLeaderboard();
+            }
+        });
+    }
 
     // 체크포인트 토글
-    document.getElementById('checkpointToggle').addEventListener('change', (e) => {
-        const targetInput = document.getElementById('checkpointTarget');
-        targetInput.disabled = !e.target.checked;
-        renderLeaderboard();
-    });
-
-    document.getElementById('checkpointTarget').addEventListener('change', renderLeaderboard);
-
-    // ★ 대회 종료 및 저장 (자동 회차 계산 기능 추가)
-    document.getElementById('finalizeBtn').addEventListener('click', async () => {
-        // 1. 현재 1등 팀 계산
-        const rankingList = [];
-        Object.values(teamsMap).forEach(team => {
-            let total = 0;
-            scoresData.filter(s => s.team_id === team.id).forEach(s => total += s.score);
-            rankingList.push({ ...team, total });
+    const cpToggle = document.getElementById('checkpointToggle');
+    if(cpToggle) {
+        cpToggle.addEventListener('change', (e) => {
+            const targetInput = document.getElementById('checkpointTarget');
+            if(targetInput) targetInput.disabled = !e.target.checked;
+            renderLeaderboard();
         });
-        rankingList.sort((a, b) => b.total - a.total);
+    }
 
-        const winner = rankingList[0];
+    const cpTarget = document.getElementById('checkpointTarget');
+    if(cpTarget) {
+        cpTarget.addEventListener('change', renderLeaderboard);
+    }
 
-        if (!winner || winner.total === 0) {
-            return alert("점수 데이터가 없습니다.");
-        }
-
-        // 2. ★ 자동 회차 계산 로직 ★
-        // DB에서 기존 우승 팀 이름들을 가져옵니다.
-        const { data: history, error: fetchError } = await supabase
-            .from('hall_of_fame')
-            .select('team_name');
-
-        let nextRound = 1; // 기본값 1회차
-
-        if (!fetchError && history.length > 0) {
-            // "숫자+회차" 패턴을 찾아서 가장 큰 숫자를 찾음
-            const rounds = history.map(h => {
-                // 예: "16회차 우승팀" -> 16 추출
-                const match = h.team_name.match(/(\d+)회차/);
-                return match ? parseInt(match[1]) : 0;
+    // ★ 대회 종료 및 명예의 전당 저장
+    const finalizeBtn = document.getElementById('finalizeBtn');
+    if(finalizeBtn) {
+        finalizeBtn.addEventListener('click', async () => {
+            // 1등 팀 계산
+            const rankingList = [];
+            Object.values(teamsMap).forEach(team => {
+                let total = 0;
+                scoresData.filter(s => s.team_id === team.id).forEach(s => total += s.score);
+                rankingList.push({ ...team, total });
             });
+            rankingList.sort((a, b) => b.total - a.total);
 
-            const maxRound = Math.max(...rounds);
-            nextRound = maxRound + 1; // 다음 회차 번호
-        }
+            const winner = rankingList[0];
 
-        // 3. 이름 확정하기 (사용자에게 확인 받기)
-        // 기본값으로 '17회차 우승팀'이 입력되어 뜹니다.
-        const defaultName = `${nextRound}회차 우승팀`;
-        const finalTeamName = prompt("이번 대회의 이름을 입력하세요.\n(확인을 누르면 명예의 전당에 저장됩니다)", defaultName);
+            if (!winner || winner.total === 0) {
+                return alert("점수 데이터가 없거나 0점입니다.");
+            }
 
-        // 취소 버튼 누르면 저장 안 함
-        if (finalTeamName === null) return;
-        if (finalTeamName.trim() === "") return alert("이름을 입력해야 합니다.");
+            // 자동 회차 계산 (예: "17회차")
+            const { data: history, error: fetchError } = await supabase
+                .from('hall_of_fame')
+                .select('team_name');
 
-        // 4. DB 저장
-        const { error } = await supabase
-            .from('hall_of_fame')
-            .insert([{
-                team_name: finalTeamName, // 입력받은 이름 (예: 17회차 우승팀)
-                members: winner.members.join(', '),
-                total_score: winner.total,
-                match_detail: rankingList
-            }]);
+            let nextRoundNum = 1;
 
-        if (error) {
-            console.error(error);
-            alert("저장 실패! (콘솔 확인)");
-        } else {
-            alert(`축하합니다! 🎉\n[${finalTeamName}] 기록이 명예의 전당에 등록되었습니다.`);
-        }
-    });
+            if (!fetchError && history.length > 0) {
+                const rounds = history.map(h => {
+                    const match = h.team_name.match(/(\d+)회차/);
+                    return match ? parseInt(match[1]) : 0;
+                });
+                const maxR = Math.max(...rounds);
+                nextRoundNum = maxR + 1;
+            }
+
+            const defaultName = `${nextRoundNum}회차 우승팀`;
+            const finalTeamName = prompt("이번 대회의 이름을 입력하세요.", defaultName);
+
+            if (finalTeamName === null) return;
+            if (finalTeamName.trim() === "") return alert("이름을 입력해주세요.");
+
+            // 명예의 전당에 저장
+            const { error } = await supabase
+                .from('hall_of_fame')
+                .insert([{
+                    team_name: finalTeamName,
+                    members: winner.members.join(', '),
+                    total_score: winner.total,
+                    // 상세 랭킹 정보도 같이 저장 (선택 사항)
+                    match_detail: rankingList 
+                }]);
+
+            if (error) {
+                console.error(error);
+                alert("저장 실패! (콘솔 확인)");
+            } else {
+                alert(`축하합니다! [${finalTeamName}] 우승이 기록되었습니다.`);
+            }
+        });
+    }
 }

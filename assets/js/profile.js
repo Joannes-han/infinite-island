@@ -1,38 +1,36 @@
-// assets/js/profile.js
 import { supabase } from './supabase.js';
 
-let allPlayers = [];      // 전체 선수 데이터 (스탯 포함)
-let hallOfFameData = [];  // 명예의 전당 기록
+let allPlayers = [];
+let hallOfFameData = [];
 
-// 정렬 상태 저장 (기본: 이름 오름차순)
-let currentSort = {
-    key: 'name',
-    order: 'asc' // 'asc' or 'desc'
-};
+// 정렬 상태 관리
+let currentSort = { key: 'name', order: 'asc' };
 
-// 티어 정렬을 위한 가중치 (높을수록 상위)
+// 티어 가중치 (정렬용) - Chicken, Stick 추가
 const TIER_WEIGHT = {
     'SSS': 100, 'SS': 90, 'S': 80, 'A': 70, 
     'B': 60, 'C': 50, 'D': 40, 'F': 30, 
+    'CHICKEN': 20, // 닭 (F 밑)
+    'STICK': 10,   // 나뭇가지 (제일 아래)
     'UNRANKED': 0, '-': 0
 };
 
 document.addEventListener('DOMContentLoaded', () => {
     loadAllData();
 
-    // 모달 닫기 이벤트
+    // 모달 닫기 버튼 이벤트
     document.getElementById('closeModalBtn').addEventListener('click', closeModal);
     document.getElementById('profileModal').addEventListener('click', (e) => {
         if (e.target === document.getElementById('profileModal')) closeModal();
     });
 
-    // 검색 필터
+    // 검색창 입력 이벤트
     document.getElementById('tableSearch').addEventListener('input', (e) => {
         const term = e.target.value.toLowerCase();
         filterTable(term);
     });
 
-    // ★ 정렬 이벤트 연결
+    // 정렬 헤더 클릭 이벤트
     document.querySelectorAll('.sortable').forEach(th => {
         th.addEventListener('click', () => {
             const key = th.dataset.key;
@@ -51,36 +49,30 @@ async function loadAllData() {
 
     hallOfFameData = historyRes.data;
 
-    // 스탯 계산 후 데이터 합치기
     allPlayers = playersRes.data.map(player => {
+        // ★ 여기서 정확한 통계 계산 수행
         const stats = calculateStats(player.name, hallOfFameData);
         return { ...player, ...stats };
     });
 
-    // 초기 렌더링
     renderTable(allPlayers);
 }
 
-// ★ 정렬 핸들러
 function handleSort(key) {
-    // 이미 선택된 컬럼이면 순서 반전 (오름 <-> 내림)
     if (currentSort.key === key) {
         currentSort.order = currentSort.order === 'asc' ? 'desc' : 'asc';
     } else {
-        // 새로운 컬럼이면 기본 정렬 설정
         currentSort.key = key;
-        // 승률, 우승횟수 등 숫자는 내림차순(높은게 위로)이 기본이 좋음
         if (['totalGames', 'totalWins', 'winRate'].includes(key)) {
             currentSort.order = 'desc';
         } else if (key === 'avgRank') {
-            currentSort.order = 'asc'; // 순위는 낮을수록(1위) 좋음
+            currentSort.order = 'asc';
         } else {
-            currentSort.order = 'asc'; // 이름, 티어는 오름차순
+            currentSort.order = 'asc';
         }
     }
-
-    updateSortIcons(); // 아이콘 UI 업데이트
-    sortAndRender();   // 실제 데이터 정렬 및 그리기
+    updateSortIcons();
+    sortAndRender();
 }
 
 function sortAndRender() {
@@ -91,57 +83,42 @@ function sortAndRender() {
         let valA = a[key];
         let valB = b[key];
 
-        // 1. 티어 정렬 특수 처리
         if (key === 'tier') {
             valA = TIER_WEIGHT[(valA || '-').toUpperCase()] || 0;
             valB = TIER_WEIGHT[(valB || '-').toUpperCase()] || 0;
-            // 티어는 점수가 높을수록 좋은 거니, 오름차순일 때 반대로(낮은게 먼저) 보이게 할지, 높은게 먼저일지 결정
-            // 여기선 일반적인 로직(값 크기 비교) 따름
         } 
-        // 2. 평균 순위 특수 처리 ('-'는 꼴등보다 아래로)
         else if (key === 'avgRank') {
-            // '-'는 무한대 값으로 취급하여 항상 뒤로 보냄
             valA = valA === '-' ? 999 : parseFloat(valA);
             valB = valB === '-' ? 999 : parseFloat(valB);
         }
-        // 3. 문자열 비교 (이름 등)
         else if (typeof valA === 'string') {
             return valA.localeCompare(valB) * multiplier;
         }
 
-        // 숫자 비교
         if (valA < valB) return -1 * multiplier;
         if (valA > valB) return 1 * multiplier;
         return 0;
     });
 
-    // 현재 검색어가 있다면 검색 결과 내에서 렌더링, 아니면 전체 렌더링
     const searchTerm = document.getElementById('tableSearch').value.toLowerCase();
-    if (searchTerm) {
-        filterTable(searchTerm);
-    } else {
-        renderTable(allPlayers);
-    }
+    if (searchTerm) filterTable(searchTerm);
+    else renderTable(allPlayers);
 }
 
-// 정렬 아이콘 UI 업데이트
 function updateSortIcons() {
     document.querySelectorAll('.sortable').forEach(th => {
         th.classList.remove('active');
         const icon = th.querySelector('i');
-        icon.className = 'fa-solid fa-sort sort-icon'; // 초기화
+        icon.className = 'fa-solid fa-sort sort-icon';
         
         if (th.dataset.key === currentSort.key) {
             th.classList.add('active');
-            if (currentSort.order === 'asc') {
-                icon.className = 'fa-solid fa-sort-up sort-icon'; // 오름차순 아이콘
-            } else {
-                icon.className = 'fa-solid fa-sort-down sort-icon'; // 내림차순 아이콘
-            }
+            icon.className = currentSort.order === 'asc' ? 'fa-solid fa-sort-up sort-icon' : 'fa-solid fa-sort-down sort-icon';
         }
     });
 }
 
+// ★ [핵심 수정] 정확한 이름 매칭을 위한 통계 계산 함수
 function calculateStats(playerName, historyData) {
     let totalGames = 0;
     let totalWins = 0;
@@ -149,63 +126,50 @@ function calculateStats(playerName, historyData) {
     let rankCount = 0;
     const matches = [];
 
+    // 헬퍼 함수: 쉼표로 자르고 앞뒤 공백 제거
+    const parseMembers = (str) => {
+        if (!str) return [];
+        return str.split(',').map(s => s.trim()).filter(s => s.length > 0);
+    };
+
     historyData.forEach(record => {
         if (!record.match_detail || !Array.isArray(record.match_detail)) return;
         
-        // 수정된 부분: 배열/문자열 모두 처리하여 인덱스 찾기
+        // 내 이름이 포함된 팀 찾기 (정확히 일치하는 경우만)
         const myIndex = record.match_detail.findIndex(team => {
-            if (!team.members) return false;
-
             let memberList = [];
-            // A. 이미 배열이라면 그대로 사용
+            
             if (Array.isArray(team.members)) {
                 memberList = team.members;
-            } 
-            // B. 문자열이라면 콤마로 분리
-            else if (typeof team.members === 'string') {
-                memberList = team.members.split(',').map(m => m.trim());
+            } else if (typeof team.members === 'string') {
+                memberList = parseMembers(team.members);
             }
-
+            
+            // ★ includes()를 배열에 사용하면 정확히 일치하는 요소만 찾음 ("Jack" != "Captain Jack")
             return memberList.includes(playerName);
         });
 
-        // 선수를 찾았다면 (myIndex가 -1이 아님)
         if (myIndex !== -1) {
             totalGames++;
-            
-            // ★ 핵심: 배열 순서(index)가 곧 순위임 (0번째 -> 1위)
             let rank = myIndex + 1; 
-
-            // 예외 처리: 만약 id에 "우승"이라는 텍스트가 명시되어 있다면 무조건 1위로 간주
             const myRecord = record.match_detail[myIndex];
             const idText = (myRecord.id || '').toString();
-            if (idText.includes('우승') || idText.includes('1등')) {
-                rank = 1;
-            }
-
-            // 통계 집계
-            if (rank === 1) totalWins++;
             
-            // 평균 순위 계산 (99위 이상은 제외)
-            if (rank < 99) {
-                rankSum += rank;
-                rankCount++;
-            }
+            if (idText.includes('우승') || idText.includes('1등')) rank = 1;
 
-            // 멤버 목록을 화면에 보여줄 때는 문자열로 변환
+            if (rank === 1) totalWins++;
+            if (rank < 99) { rankSum += rank; rankCount++; }
+
             let displayMembers = "";
             if(Array.isArray(myRecord.members)) displayMembers = myRecord.members.join(', ');
             else displayMembers = myRecord.members;
 
             matches.push({
                 date: new Date(record.created_at).toLocaleDateString(),
-                title: record.team_name, // team_name? round_name? 확인 필요 (보통 round_name이 대회명)
-                // 만약 team_name이 'Winning Team Name'이라면 round_name으로 바꾸는 게 좋을 수도 있습니다.
-                // 여기선 일단 기존 코드 유지
-                
+                title: record.team_name, 
                 members: displayMembers,
                 rank: rank,
-                rankText: idText // 화면 표시용 텍스트 (예: "Team 1" or "1위")
+                rankText: idText 
             });
         }
     });
@@ -224,6 +188,11 @@ function renderTable(players) {
         const tr = document.createElement('tr');
         const imgHtml = p.image_url ? `<img src="${p.image_url}">` : `<i class="fa-solid fa-user" style="color:#555"></i>`;
 
+        // 테이블 목록에서 티어 한글 변환
+        let displayTier = p.tier || '-';
+        if (displayTier === 'Chicken') displayTier = '닭';
+        if (displayTier === 'Stick') displayTier = '나뭇가지';
+
         tr.innerHTML = `
             <td>
                 <div class="td-player-info">
@@ -231,7 +200,7 @@ function renderTable(players) {
                     <span class="td-name">${p.name}</span>
                 </div>
             </td>
-            <td style="color:var(--accent-gold); font-weight:bold;">${p.tier || '-'}</td>
+            <td style="color:var(--accent-gold); font-weight:bold;">${displayTier}</td>
             <td>${p.totalGames}</td>
             <td>${p.totalWins}</td>
             <td class="text-win-rate">${p.winRate}%</td>
@@ -243,14 +212,21 @@ function renderTable(players) {
 }
 
 function filterTable(term) {
+    // 검색창 기능: 여기서는 'ja'라고 쳐도 'jack'이 나와야 하므로 includes 유지
+    // 하지만 검색 결과 클릭 시 상세 정보는 위에서 수정한 calculateStats 덕분에 정확하게 나옴
     const filtered = allPlayers.filter(p => p.name.toLowerCase().includes(term));
     renderTable(filtered);
 }
 
-// 모달 관련 함수
 function openModal(player) {
     document.getElementById('pName').textContent = player.name;
-    document.getElementById('pTier').textContent = player.tier || 'Unranked';
+    
+    // 모달창에서도 티어 한글 변환
+    let displayTier = player.tier || 'Unranked';
+    if (displayTier === 'Chicken') displayTier = '닭';
+    if (displayTier === 'Stick') displayTier = '나뭇가지';
+    document.getElementById('pTier').textContent = displayTier;
+
     document.getElementById('pCost').textContent = `${player.cost || 0} 코스트`;
     
     const imgBox = document.getElementById('pImg');

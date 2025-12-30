@@ -1,8 +1,9 @@
 import { supabase } from './supabase.js';
 
 let allPlayers = [];
-let currentTeamCount = 6; 
-const MAX_PLAYERS_PER_TEAM = 3; 
+// ★ [수정 1] 저장된 팀 개수가 있으면 그걸 쓰고, 없으면 기본 6개
+let currentTeamCount = parseInt(localStorage.getItem('draftTeamCount')) || 6;
+const MAX_PLAYERS_PER_TEAM = 3;
 
 document.addEventListener('DOMContentLoaded', () => {
     setupInitialLayout();
@@ -14,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function setupInitialLayout() {
     const container = document.getElementById('teams-container');
     container.innerHTML = '';
+    // 저장된 개수(currentTeamCount)만큼 박스를 생성함
     for (let i = 1; i <= currentTeamCount; i++) {
         createTeamSlot(i);
     }
@@ -46,7 +48,7 @@ async function loadDraftData() {
         .from('players')
         .select('*')
         .eq('status', 'present')
-        .order('cost', { ascending: false }) 
+        .order('cost', { ascending: false })
         .order('name', { ascending: true });
 
     if (error) { console.error(error); return; }
@@ -56,22 +58,38 @@ async function loadDraftData() {
 
 // 3. 선수 배치
 function renderPlayers() {
+    // 1. 구역 비우기
     document.querySelectorAll('.tier-body-pool').forEach(el => el.innerHTML = '');
     for (let i = 1; i <= currentTeamCount; i++) {
         const slot = document.getElementById(`team-${i}`);
-        if(slot) slot.innerHTML = '';
+        if (slot) slot.innerHTML = '';
     }
 
+    // 2. 선수 배치 시작
     allPlayers.forEach(player => {
         const chip = createPlayerChip(player);
-        
-        // 메모리(allPlayers) 상태에 따라 배치
+
+        // A. 팀에 소속된 경우
         if (player.team_id && player.team_id >= 1 && player.team_id <= currentTeamCount) {
-            document.getElementById(`team-${player.team_id}`).appendChild(chip);
-        } else {
-            const tierKey = (player.tier || 'Unranked').toLowerCase();
-            const targetPool = document.getElementById(`pool-${tierKey}`);
-            if (targetPool) targetPool.appendChild(chip);
+            const teamSlot = document.getElementById(`team-${player.team_id}`);
+            if (teamSlot) {
+                teamSlot.appendChild(chip);
+                return; // 팀 배정 완료되면 다음 선수로
+            }
+        }
+
+        // B. 대기실(Pool)에 있는 경우
+        let tierRaw = player.tier || 'Unranked';
+        let tierKey = tierRaw.toLowerCase().trim();
+        let targetPool = document.getElementById(`pool-${tierKey}`);
+
+        if (!targetPool) {
+            // console.warn(`박스 없음: ${tierKey}`); // 디버깅용
+            targetPool = document.getElementById('pool-unranked');
+        }
+
+        if (targetPool) {
+            targetPool.appendChild(chip);
         }
     });
 
@@ -79,7 +97,7 @@ function renderPlayers() {
     updatePoolCount();
 }
 
-// ★ 선수 칩 생성 (DB 통신 제거 - 메모리만 변경)
+// 칩 생성 함수
 function createPlayerChip(player) {
     const div = document.createElement('div');
     div.className = 'player-chip';
@@ -88,9 +106,12 @@ function createPlayerChip(player) {
     div.dataset.cost = player.cost || 0;
     div.dataset.name = player.name;
 
-    // 이미지 처리
-    const imgContent = player.image_url 
-        ? `<img src="${player.image_url}" style="width:100%; height:100%; object-fit:cover;">` 
+    let displayTier = player.tier || '-';
+    if (displayTier === 'Chicken') displayTier = '닭';
+    if (displayTier === 'Stick') displayTier = '나뭇가지';
+
+    const imgContent = player.image_url
+        ? `<img src="${player.image_url}" style="width:100%; height:100%; object-fit:cover;">`
         : `<i class="fa-solid fa-user"></i>`;
 
     div.innerHTML = `
@@ -98,17 +119,16 @@ function createPlayerChip(player) {
         <div class="chip-info">
             <span class="chip-name">${player.name}</span>
             <div class="chip-meta">
-                <span class="chip-tier" style="color:var(--accent-gold)">${player.tier || '-'}</span>
+                <span class="chip-tier" style="color:var(--accent-gold)">${displayTier}</span>
                 <span class="chip-cost" style="color:#aaa; margin-left:4px;">(${player.cost})</span>
             </div>
         </div>
     `;
 
-    // 드래그 시작
+    // 드래그 이벤트
     div.addEventListener('dragstart', (e) => {
         div.classList.add('dragging');
         e.dataTransfer.setData('text/plain', player.id);
-        e.dataTransfer.effectAllowed = "move";
     });
 
     div.addEventListener('dragend', () => {
@@ -116,42 +136,36 @@ function createPlayerChip(player) {
         document.querySelectorAll('.swap-target').forEach(el => el.classList.remove('swap-target'));
     });
 
-    // 스왑 이벤트
     div.addEventListener('dragover', (e) => {
         e.preventDefault(); e.stopPropagation();
         const draggingCard = document.querySelector('.dragging');
-        if (draggingCard && draggingCard !== div) {
-            div.classList.add('swap-target');
-        }
+        if (draggingCard && draggingCard !== div) div.classList.add('swap-target');
     });
 
     div.addEventListener('dragleave', (e) => div.classList.remove('swap-target'));
 
-    // ★ Drop 이벤트 (스왑 - 메모리만 변경)
     div.addEventListener('drop', (e) => {
         e.preventDefault(); e.stopPropagation();
         div.classList.remove('swap-target');
-
         const draggedId = document.querySelector('.dragging').dataset.id;
-        const targetId = div.dataset.id; 
+        const targetId = div.dataset.id;
 
         if (draggedId && targetId && draggedId !== targetId) {
-            // DB 업데이트 없이 화면만 변경
             swapPlayersInMemory(draggedId, targetId);
         }
     });
 
-    // ★ 클릭 이벤트 (대기실 복귀 - 메모리만 변경)
     div.addEventListener('click', () => {
         const parent = div.parentElement;
         if (parent && parent.classList.contains('team-slots')) {
             const p = allPlayers.find(x => x.id == player.id);
-            if (p) p.team_id = null; // 메모리 수정
-            
-            const tierKey = (player.tier || 'Unranked').toLowerCase();
+            if (p) p.team_id = null;
+
+            const tierKey = (player.tier || 'Unranked').toLowerCase().trim();
             const targetPool = document.getElementById(`pool-${tierKey}`);
-            if (targetPool) targetPool.appendChild(div); // 화면 이동
-            
+            if (targetPool) targetPool.appendChild(div);
+            else document.getElementById('pool-unranked').appendChild(div);
+
             updateAllTeamInfo();
             updatePoolCount();
         }
@@ -179,11 +193,9 @@ function setupDropZone(container) {
         container.classList.remove('drag-over', 'full');
     });
 
-    // ★ Drop 이벤트 (메모리만 변경)
     container.addEventListener('drop', e => {
         e.preventDefault();
         container.classList.remove('drag-over', 'full');
-        
         const draggingCard = document.querySelector('.dragging');
         if (!draggingCard) return;
 
@@ -193,13 +205,11 @@ function setupDropZone(container) {
                 return;
             }
         }
-
         container.appendChild(draggingCard);
-        
+
         const playerId = draggingCard.dataset.id;
         const newTeamId = container.dataset.teamId ? parseInt(container.dataset.teamId) : null;
 
-        // DB 업데이트 없이 로컬 변수만 변경
         const p = allPlayers.find(x => x.id == playerId);
         if (p) p.team_id = newTeamId;
 
@@ -208,20 +218,92 @@ function setupDropZone(container) {
     });
 }
 
-// ★ [신규] 메모리 상에서만 스왑 (저장 전까지 DB 안 건드림)
 function swapPlayersInMemory(playerA_Id, playerB_Id) {
     const pA = allPlayers.find(p => p.id == playerA_Id);
     const pB = allPlayers.find(p => p.id == playerB_Id);
-
     if (!pA || !pB) return;
 
-    // 메모리 값 교환
     const tempTeamId = pA.team_id;
     pA.team_id = pB.team_id;
     pB.team_id = tempTeamId;
 
-    // 화면 다시 그리기
-    renderPlayers(); 
+    renderPlayers();
+}
+
+async function saveTeamsToDB() {
+    const btn = document.getElementById('saveTeamsBtn');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 저장 중...';
+    btn.disabled = true;
+
+    try {
+        await supabase.from('players').update({ team_id: null }).neq('id', 0);
+
+        const updates = [];
+        allPlayers.forEach(p => {
+            if (p.team_id !== null && p.team_id >= 1 && p.team_id <= currentTeamCount) {
+                updates.push(
+                    supabase.from('players').update({ team_id: p.team_id }).eq('id', p.id)
+                );
+            }
+        });
+
+        if (updates.length > 0) {
+            await Promise.all(updates);
+        }
+        alert("✅ 팀 배치가 저장되었습니다!");
+    } catch (err) {
+        console.error(err);
+        alert("저장 중 오류가 발생했습니다.");
+    } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+}
+
+function runAutoDraft() {
+    if (!allPlayers || allPlayers.length === 0) return alert("배정할 선수가 없습니다.");
+    if (!confirm(`현재 대기 중인 ${allPlayers.length}명의 선수를\n자동으로 배정하시겠습니까?`)) return;
+
+    const totalPlayers = allPlayers.length;
+    const optimalTeamCount = Math.floor(totalPlayers / 3) || 1;
+
+    const container = document.getElementById('teams-container');
+    container.innerHTML = '';
+    
+    // ★ [수정 2] 자동 배정 시 팀 개수 변경 및 저장
+    currentTeamCount = optimalTeamCount;
+    localStorage.setItem('draftTeamCount', currentTeamCount);
+
+    for (let i = 1; i <= currentTeamCount; i++) {
+        createTeamSlot(i);
+    }
+
+    allPlayers.forEach(p => p.team_id = null);
+
+    let sortedPlayers = shuffleArray([...allPlayers]);
+    sortedPlayers.sort((a, b) => b.cost - a.cost);
+
+    const teamStatus = [];
+    for (let i = 1; i <= currentTeamCount; i++) {
+        teamStatus.push({ id: i, currentCost: 0, membersCount: 0 });
+    }
+
+    for (const player of sortedPlayers) {
+        const availableTeams = teamStatus.filter(t => t.membersCount < MAX_PLAYERS_PER_TEAM);
+        if (availableTeams.length === 0) break;
+
+        availableTeams.sort((a, b) => a.currentCost - b.currentCost);
+        const minCost = availableTeams[0].currentCost;
+        const candidates = availableTeams.filter(t => t.currentCost === minCost);
+        const targetTeam = candidates[Math.floor(Math.random() * candidates.length)];
+
+        player.team_id = targetTeam.id;
+        targetTeam.currentCost += (player.cost || 0);
+        targetTeam.membersCount += 1;
+    }
+
+    renderPlayers();
 }
 
 // ★★★ [가장 중요] 팀 확정 저장 함수 (DB 전체 갱신) ★★★
@@ -323,7 +405,7 @@ function updateAllTeamInfo() {
         document.getElementById(`cost-team-${i}`).innerHTML = `Total: <b>${totalCost}</b>`;
         const countEl = document.getElementById(`count-team-${i}`);
         countEl.textContent = `[${count}/${MAX_PLAYERS_PER_TEAM}]`;
-        
+
         if (count === MAX_PLAYERS_PER_TEAM) countEl.style.color = '#e74c3c';
         else if (count > 0) countEl.style.color = '#2ed573';
         else countEl.style.color = '#aaa';
@@ -346,32 +428,36 @@ function shuffleArray(array) {
 
 function setupEvents() {
     document.getElementById('resetTeamsBtn').addEventListener('click', async () => {
-        if(!confirm("화면을 초기화하시겠습니까?")) return;
+        if (!confirm("화면을 초기화하시겠습니까?")) return;
         allPlayers.forEach(p => p.team_id = null);
         renderPlayers();
     });
 
     document.getElementById('addTeamBtn').addEventListener('click', () => {
-        currentTeamCount++; createTeamSlot(currentTeamCount);
+        currentTeamCount++; 
+        // ★ [수정 3] 팀 추가 시 개수 저장
+        localStorage.setItem('draftTeamCount', currentTeamCount);
+        createTeamSlot(currentTeamCount);
     });
-    
+
     document.getElementById('removeTeamBtn').addEventListener('click', async () => {
         if (currentTeamCount <= 1) return;
         const lastTeamId = currentTeamCount;
         const lastTeamSlot = document.getElementById(`team-${lastTeamId}`);
-        
+
         if (lastTeamSlot.childElementCount > 0) {
-            if(!confirm(`Team ${lastTeamId}을 해체하시겠습니까?`)) return;
-            // 팀 해체 시 메모리만 업데이트
+            if (!confirm(`Team ${lastTeamId}을 해체하시겠습니까?`)) return;
             const chips = Array.from(lastTeamSlot.children);
             chips.forEach(chip => {
                 const p = allPlayers.find(x => x.id == chip.dataset.id);
-                if(p) p.team_id = null;
+                if (p) p.team_id = null;
             });
             renderPlayers();
         }
         document.getElementById(`team-card-${lastTeamId}`).remove();
         currentTeamCount--;
+        // ★ [수정 4] 팀 삭제 시 개수 저장
+        localStorage.setItem('draftTeamCount', currentTeamCount);
     });
 
     document.getElementById('copyTextBtn').addEventListener('click', () => {
@@ -386,10 +472,8 @@ function setupEvents() {
         navigator.clipboard.writeText(copyString).then(() => alert("복사 완료!"));
     });
 
-    // 자동 배정 버튼 (로컬 실행)
     document.getElementById('autoDraftBtn').addEventListener('click', runAutoDraft);
 
-    // ★ 저장 버튼 이벤트 연결 (이게 있어야 작동함)
     const saveBtn = document.getElementById('saveTeamsBtn');
     if (saveBtn) saveBtn.addEventListener('click', saveTeamsToDB);
 }

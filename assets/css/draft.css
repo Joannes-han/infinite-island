@@ -95,6 +95,8 @@
 .tier-header.d { border-left-color: var(--tier-d); color: var(--tier-d); }
 .tier-header.f { border-left-color: var(--tier-f); color: var(--tier-f); }
 .tier-header.unranked { border-left-color: #555; color: var(--text-muted); }
+.tier-header.chicken {border-left-color: #f5f6fa; color: var(--tier-chicken); }
+.tier-header.stick {border-left-color: #8d6e63; color: var(--tier-stick); }
 
 .tier-body-pool {
     padding: 10px; background-color: var(--bg-panel);

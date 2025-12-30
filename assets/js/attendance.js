@@ -1,6 +1,8 @@
 import { supabase } from './supabase.js';
 
-const TIER_ORDER = ['SSS', 'SS', 'S', 'A', 'B', 'C', 'D', 'F'];
+import { initTheme, setupThemeToggle } from './theme-manager.js';
+
+const TIER_ORDER = ['SSS', 'SS', 'S', 'A', 'B', 'C', 'D', 'F', '닭', '나뭇가지'];
 let allPlayers = []; // ★ 데이터를 저장해둘 공간 (글로벌 변수)
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -28,7 +30,7 @@ async function loadPlayersFromServer() {
 function renderAll() {
     const presentList = document.getElementById('present-list');
     const absentList = document.getElementById('absent-list');
-    
+
     // 초기화
     presentList.innerHTML = '';
     absentList.innerHTML = '';
@@ -47,29 +49,46 @@ function renderAll() {
     document.getElementById('absentCount').textContent = absentPlayers.length;
 }
 
-// 3. 컬럼 렌더링 함수
+// assets/js/attendance.js
+
+// 3. 컬럼 렌더링 함수 (영어 -> 한글 변환 기능 추가)
 function renderColumn(container, players, type) {
+    // 1. 그룹핑 준비
     const grouped = {};
     TIER_ORDER.forEach(t => grouped[t] = []);
     grouped['Unranked'] = [];
 
+    // 2. 선수 분류
     players.forEach(p => {
-        const t = p.tier ? p.tier.toUpperCase() : 'Unranked';
+        // 소문자나 공백 문제 방지 (.trim)
+        const t = p.tier ? p.tier.trim() : 'Unranked';
+
+        // TIER_ORDER에 있는 키인지 확인 (Chicken, Stick 등)
         if (grouped[t]) grouped[t].push(p);
         else grouped['Unranked'].push(p);
     });
 
+    // 3. 화면 그리기
     [...TIER_ORDER, 'Unranked'].forEach(tier => {
         const groupDiv = document.createElement('div');
         groupDiv.className = 'tier-group-small';
 
-        const tierColor = getComputedStyle(document.documentElement).getPropertyValue(`--tier-${tier.toLowerCase()}`) || '#777';
+        // CSS 변수 가져오기 (소문자로 변환해서 찾음: --tier-chicken)
+        const tierColor = getComputedStyle(document.documentElement)
+            .getPropertyValue(`--tier-${tier.toLowerCase()}`) || '#777';
+
         const count = grouped[tier].length;
         const countColor = count > 0 ? '#fff' : '#444';
 
+        // ★ [핵심 1] 티어 그룹 제목 한글 변환
+        let displayGroupTitle = tier;
+        if (tier === 'Chicken') displayGroupTitle = '닭';
+        if (tier === 'Stick') displayGroupTitle = '나뭇가지';
+
         groupDiv.innerHTML = `
             <div class="tier-label" style="border-left-color: ${tierColor}; color: ${tierColor};">
-                ${tier} <span style="font-size: 12px; color: ${countColor}; margin-left: 5px;">(${count})</span>
+                ${displayGroupTitle} 
+                <span style="font-size: 12px; color: ${countColor}; margin-left: 5px;">(${count})</span>
             </div>
             <div class="player-chips-area"></div>
         `;
@@ -80,15 +99,20 @@ function renderColumn(container, players, type) {
             grouped[tier].forEach(player => {
                 const chip = document.createElement('div');
                 chip.className = 'player-chip';
-                
-                // 디자인 (색깔 점 + 이름 + 티어)
+
+                // ★ [핵심 2] 선수 이름 옆 괄호 안 한글 변환
+                let displayTierName = tier;
+                if (tier === 'Chicken') displayTierName = '닭';
+                if (tier === 'Stick') displayTierName = '나뭇가지';
+
+                // 칩 디자인
                 chip.innerHTML = `
                     <span class="status-dot"></span>
                     <span class="player-name">${player.name}</span>
-                    <span class="tier-suffix">(${tier})</span>
+                    <span class="tier-suffix">(${displayTierName})</span>
                 `;
 
-                // 클릭 이벤트
+                // 클릭 이벤트 (이동)
                 chip.onclick = () => movePlayerOptimistic(player, type);
                 chipsArea.appendChild(chip);
             });
@@ -123,9 +147,9 @@ async function movePlayerOptimistic(targetPlayer, currentType) {
     if (error) {
         console.error("저장 실패, 원상복구 합니다.");
         alert("서버 저장 실패! 인터넷을 확인하세요.");
-        
+
         // 실패했으니 다시 원래대로 돌려놓고 화면 갱신
-        allPlayers[playerIndex].status = currentType; 
+        allPlayers[playerIndex].status = currentType;
         renderAll();
     }
 }

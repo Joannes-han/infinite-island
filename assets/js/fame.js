@@ -49,6 +49,7 @@ function renderHistoryPage(page) {
             dateStr = new Date(record.created_at).toLocaleDateString();
         }
         const membersStr = record.members || "멤버 정보 없음";
+        
 
         // 상세 테이블 HTML 생성
         let detailsHtml = '';
