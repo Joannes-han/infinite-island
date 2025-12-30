@@ -90,7 +90,7 @@ async function loadRealDashboard() {
 }
 
 // ============================================================
-// ★ [수정] 명예의 전당 통계 계산 (DB image_url 100% 반영)
+// ★ [수정] 명예의 전당 통계 계산 (최소 판수 제한 추가)
 // ============================================================
 async function loadHallOfFameStats() {
     try {
@@ -99,12 +99,11 @@ async function loadHallOfFameStats() {
             .from('hall_of_fame')
             .select('*');
 
-        // 2. ★ 플레이어들의 프로필 사진 주소(image_url) 미리 가져오기
+        // 2. 플레이어 프로필 사진 주소 가져오기
         const { data: profiles } = await supabase
             .from('players')
             .select('name, image_url'); 
         
-        // 이름:주소 형태로 매핑 (예: { "로컨": "https://...", "강퀴": "https://..." })
         const imgMap = {};
         if (profiles) {
             profiles.forEach(p => {
@@ -118,8 +117,6 @@ async function loadHallOfFameStats() {
         }
 
         const stats = {};
-
-        // 이름 분리 함수 (공백 제거)
         const parseMembers = (str) => {
             if (!str) return [];
             return str.split(',').map(s => s.trim()).filter(s => s.length > 0);
@@ -130,14 +127,8 @@ async function loadHallOfFameStats() {
             if (record.members) {
                 const winners = parseMembers(record.members);
                 winners.forEach(player => {
-                    // ★ 통계 객체 생성 시, 위에서 만든 imgMap에서 주소를 꺼내 저장함
                     if (!stats[player]) {
-                        stats[player] = { 
-                            wins: 0, 
-                            games: 0, 
-                            rankSum: 0, 
-                            img: imgMap[player] // 여기에 DB 주소가 들어감
-                        }; 
+                        stats[player] = { wins: 0, games: 0, rankSum: 0, img: imgMap[player] }; 
                     }
                     stats[player].wins++;
                 });
@@ -146,7 +137,7 @@ async function loadHallOfFameStats() {
             // 2. 출전 횟수 & 순위 집계
             if (record.match_detail && Array.isArray(record.match_detail)) {
                 record.match_detail.forEach((team, index) => {
-                    const rank = index + 1;
+                    const rank = index + 1; // 배열 순서대로 1위, 2위...
                     let membersStr = '';
                     if (Array.isArray(team.members)) membersStr = team.members.join(',');
                     else membersStr = team.members || '';
@@ -154,12 +145,7 @@ async function loadHallOfFameStats() {
                     const members = parseMembers(membersStr);
                     members.forEach(player => {
                         if (!stats[player]) {
-                            stats[player] = { 
-                                wins: 0, 
-                                games: 0, 
-                                rankSum: 0, 
-                                img: imgMap[player] // 여기에 DB 주소가 들어감
-                            }; 
+                            stats[player] = { wins: 0, games: 0, rankSum: 0, img: imgMap[player] }; 
                         }
                         stats[player].games++;
                         stats[player].rankSum += rank;
@@ -173,19 +159,36 @@ async function loadHallOfFameStats() {
         let maxGames = { name: '-', val: 0, img: null };
         let bestAvg = { name: '-', val: 999, img: null };
 
+        // ★ [설정] 평균 순위 인정 최소 판수 (이 숫자보다 적게 하면 랭킹 제외)
+        const MIN_GAMES_THRESHOLD = 3; 
+
         Object.keys(stats).forEach(player => {
             const s = stats[player];
 
-            // 최다 우승
-            if (s.wins > maxWins.val) maxWins = { name: player, val: s.wins, img: s.img };
+            // (1) 최다 우승
+            if (s.wins > maxWins.val) {
+                maxWins = { name: player, val: s.wins, img: s.img };
+            }
 
-            // 최다 출전
-            if (s.games > maxGames.val) maxGames = { name: player, val: s.games, img: s.img };
+            // (2) 최다 출전
+            if (s.games > maxGames.val) {
+                maxGames = { name: player, val: s.games, img: s.img };
+            }
 
-            // 최고 평점 (1경기 이상)
-            if (s.games > 0) {
+            // (3) 최고 평점 (평균 순위)
+            // ★ 수정됨: 최소 판수(MIN_GAMES_THRESHOLD) 이상인 사람만 계산
+            if (s.games >= MIN_GAMES_THRESHOLD) {
                 const avg = s.rankSum / s.games;
-                if (avg < bestAvg.val) bestAvg = { name: player, val: avg, img: s.img };
+                
+                // 더 낮은 평균(좋은 성적)이거나, 
+                // 평균이 같다면 '판수가 더 많은 사람'을 우선순위로 둠
+                if (avg < bestAvg.val) {
+                    bestAvg = { name: player, val: avg, img: s.img, games: s.games };
+                } else if (avg === bestAvg.val) {
+                    if (s.games > (bestAvg.games || 0)) {
+                        bestAvg = { name: player, val: avg, img: s.img, games: s.games };
+                    }
+                }
             }
         });
 
