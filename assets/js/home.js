@@ -90,25 +90,18 @@ async function loadRealDashboard() {
 }
 
 // ============================================================
-// ★ [수정] 명예의 전당 통계 계산 (최소 판수 제한 추가)
+// ★ [수정] 명예의 전당 통계 (배열 정렬 방식 - 오류 원천 차단)
 // ============================================================
 async function loadHallOfFameStats() {
-    try {
-        // 1. 명예의 전당 기록 가져오기
-        const { data: history, error } = await supabase
-            .from('hall_of_fame')
-            .select('*');
+    console.log("📊 통계 계산 시작 (배열 정렬 방식)");
 
-        // 2. 플레이어 프로필 사진 주소 가져오기
-        const { data: profiles } = await supabase
-            .from('players')
-            .select('name, image_url'); 
+    try {
+        const { data: history, error } = await supabase.from('hall_of_fame').select('*');
+        const { data: profiles } = await supabase.from('players').select('name, image_url'); 
         
         const imgMap = {};
         if (profiles) {
-            profiles.forEach(p => {
-                if(p.name) imgMap[p.name] = p.image_url;
-            });
+            profiles.forEach(p => { if(p.name) imgMap[p.name] = p.image_url; });
         }
 
         if (error || !history || history.length === 0) {
@@ -116,6 +109,7 @@ async function loadHallOfFameStats() {
             return;
         }
 
+        // 1. 데이터 전처리 (Raw Data 집계)
         const stats = {};
         const parseMembers = (str) => {
             if (!str) return [];
@@ -123,30 +117,20 @@ async function loadHallOfFameStats() {
         };
 
         history.forEach(record => {
-            // 1. 우승 횟수 집계
+            // 우승 횟수
             if (record.members) {
-                const winners = parseMembers(record.members);
-                winners.forEach(player => {
-                    if (!stats[player]) {
-                        stats[player] = { wins: 0, games: 0, rankSum: 0, img: imgMap[player] }; 
-                    }
+                parseMembers(record.members).forEach(player => {
+                    if (!stats[player]) stats[player] = { wins: 0, games: 0, rankSum: 0, img: imgMap[player] }; 
                     stats[player].wins++;
                 });
             }
-
-            // 2. 출전 횟수 & 순위 집계
+            // 출전 횟수 & 순위
             if (record.match_detail && Array.isArray(record.match_detail)) {
                 record.match_detail.forEach((team, index) => {
-                    const rank = index + 1; // 배열 순서대로 1위, 2위...
-                    let membersStr = '';
-                    if (Array.isArray(team.members)) membersStr = team.members.join(',');
-                    else membersStr = team.members || '';
-
-                    const members = parseMembers(membersStr);
-                    members.forEach(player => {
-                        if (!stats[player]) {
-                            stats[player] = { wins: 0, games: 0, rankSum: 0, img: imgMap[player] }; 
-                        }
+                    const rank = index + 1;
+                    let membersStr = Array.isArray(team.members) ? team.members.join(',') : (team.members || '');
+                    parseMembers(membersStr).forEach(player => {
+                        if (!stats[player]) stats[player] = { wins: 0, games: 0, rankSum: 0, img: imgMap[player] }; 
                         stats[player].games++;
                         stats[player].rankSum += rank;
                     });
@@ -154,43 +138,60 @@ async function loadHallOfFameStats() {
             }
         });
 
-        // 3. 분야별 1등 선정
-        let maxWins = { name: '-', val: 0, img: null };
-        let maxGames = { name: '-', val: 0, img: null };
-        let bestAvg = { name: '-', val: 999, img: null };
-
-        // ★ [설정] 평균 순위 인정 최소 판수 (이 숫자보다 적게 하면 랭킹 제외)
-        const MIN_GAMES_THRESHOLD = 3; 
-
-        Object.keys(stats).forEach(player => {
-            const s = stats[player];
-
-            // (1) 최다 우승
-            if (s.wins > maxWins.val) {
-                maxWins = { name: player, val: s.wins, img: s.img };
-            }
-
-            // (2) 최다 출전
-            if (s.games > maxGames.val) {
-                maxGames = { name: player, val: s.games, img: s.img };
-            }
-
-            // (3) 최고 평점 (평균 순위)
-            // ★ 수정됨: 최소 판수(MIN_GAMES_THRESHOLD) 이상인 사람만 계산
-            if (s.games >= MIN_GAMES_THRESHOLD) {
-                const avg = s.rankSum / s.games;
-                
-                // 더 낮은 평균(좋은 성적)이거나, 
-                // 평균이 같다면 '판수가 더 많은 사람'을 우선순위로 둠
-                if (avg < bestAvg.val) {
-                    bestAvg = { name: player, val: avg, img: s.img, games: s.games };
-                } else if (avg === bestAvg.val) {
-                    if (s.games > (bestAvg.games || 0)) {
-                        bestAvg = { name: player, val: avg, img: s.img, games: s.games };
-                    }
-                }
-            }
+        // 2. 객체를 배열로 변환 (다루기 쉽게)
+        const playersArray = Object.keys(stats).map(name => {
+            const data = stats[name];
+            return {
+                name: name,
+                wins: data.wins,
+                games: data.games,
+                img: data.img,
+                avg: data.games > 0 ? (data.rankSum / data.games) : 999
+            };
         });
+
+        // 3. 분야별 1등 뽑기 (정렬 사용)
+
+        // (1) 최다 우승자 (우승 많은 순 -> 판수 많은 순)
+        playersArray.sort((a, b) => {
+            if (b.wins !== a.wins) return b.wins - a.wins;
+            return b.games - a.games;
+        });
+        const maxWins = playersArray[0] && playersArray[0].wins > 0 
+            ? { name: playersArray[0].name, val: playersArray[0].wins, img: playersArray[0].img }
+            : { name: '-', val: 0 };
+
+        // (2) 최다 출전자 (판수 많은 순 -> 우승 많은 순)
+        playersArray.sort((a, b) => {
+            if (b.games !== a.games) return b.games - a.games;
+            return b.wins - a.wins;
+        });
+        const maxGames = playersArray[0] && playersArray[0].games > 0
+            ? { name: playersArray[0].name, val: playersArray[0].games, img: playersArray[0].img }
+            : { name: '-', val: 0 };
+
+        // (3) ★ [문제 해결] 평균 순위 1등
+        // 조건: 최소 3판 이상 플레이한 사람만 필터링!
+        const MIN_GAMES = 3; 
+        const avgCandidates = playersArray.filter(p => p.games >= MIN_GAMES);
+
+        // 정렬: 평균 점수 낮은 순(1.0이 짱) -> 같다면 판수 많은 순
+        avgCandidates.sort((a, b) => {
+            if (a.avg !== b.avg) return a.avg - b.avg; // 오름차순 (낮을수록 좋음)
+            return b.games - a.games; // 내림차순 (많을수록 좋음)
+        });
+
+        let bestAvg = { name: '-', val: 999, img: null };
+        
+        if (avgCandidates.length > 0) {
+            // 필터 통과한 사람이 있으면 1등을 뽑음
+            const top = avgCandidates[0];
+            console.log(`🏆 평균 순위 1위 확정: ${top.name} (평균 ${top.avg.toFixed(2)}, ${top.games}판)`);
+            bestAvg = { name: top.name, val: top.avg, img: top.img };
+        } else {
+            // 아무도 3판을 안 했으면? -> 그냥 전체에서 1등 뽑거나 '데이터 부족' 표시
+            console.log("❌ 3판 이상 한 사람이 없습니다.");
+        }
 
         renderStats({ maxWins, maxGames, bestAvg });
 

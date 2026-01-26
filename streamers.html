@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>무한섬 - 스트리머 리더보드</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/theme.css">
+    <link rel="stylesheet" href="assets/css/dashboard.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        /* 대시보드 헤더와 호환되는 검색창 스타일 */
+        .search-box {
+            position: relative;
+            width: 300px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 10px 40px 10px 15px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            outline: none;
+        }
+
+        .search-box input:focus {
+            border-color: #f1c40f;
+        }
+
+        .search-box i {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #aaa;
+        }
+
+        /* 1. 카드 기본 배경 및 테두리 */
+        .streamer-card {
+            /* 하드코딩된 색상 대신 테마 변수(--bg-panel) 사용 */
+            background-color: var(--bg-panel) !important;
+            border: 1px solid var(--border-color) !important;
+            color: var(--text-main) !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            /* 부드러운 기본 그림자 */
+        }
+
+        /* 2. 마우스 올렸을 때 (호버) */
+        .streamer-card:hover {
+            /* 호버 배경색 변수 사용 */
+            background-color: var(--bg-hover) !important;
+            border-color: var(--accent-gold) !important;
+            /* 그림자를 조금 더 진하게 */
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 3. 스트리머 이름 */
+        .st-name {
+            color: var(--text-main) !important;
+        }
+
+        /* 4. 인게임 닉네임 배지  */
+        .st-ingame {
+            /* 테마에 맞는 색 적용 */
+            background-color: var(--bg-main) !important;
+            border: 1px solid var(--border-color);
+            /* 테두리 추가 */
+            color: var(--text-muted) !important;
+        }
+
+        .st-ingame i {
+            color: var(--text-muted) !important;
+        }
+
+        /* 5. 이미지 테두리 및 배경 */
+        .st-img {
+            border-color: var(--border-color) !important;
+            background-color: var(--bg-main) !important;
+            /* 투명 이미지 대비 */
+        }
+
+        /* 6. 이미지가 없을 때 (사람 아이콘) */
+        .st-img-placeholder {
+            background-color: var(--bg-main) !important;
+            border: 2px solid var(--border-color) !important;
+            color: var(--text-muted) !important;
+        }
+
+        /* streamers.html 의 <style> 태그 안에 아래 내용 추가 */
+
+        /* 1. 정렬 버튼 스타일 */
+        .sort-group {
+            display: flex;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 4px;
+            border: 1px solid var(--border-color);
+        }
+
+        .sort-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 6px 12px;
+            cursor: pointer;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: 0.2s;
+        }
+
+        .sort-btn:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* 활성화된 버튼 (금색) */
+        .sort-btn.active {
+            background: var(--accent-gold);
+            color: #000;
+            /* 글자는 검정 */
+        }
+
+        /* 2.티어 구분선 (Grid 전체를 가로지르는 선) */
+        .tier-divider {
+            grid-column: 1 / -1;
+            /* 그리드 처음부터 끝까지 차지 */
+            display: flex;
+            align-items: center;
+            margin-top: 30px;
+            /* 위쪽 여백 */
+            margin-bottom: 10px;
+            color: var(--accent-gold);
+            font-weight: 800;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+        }
+
+        /* 구분선 옆에 긴 줄 긋기 */
+        .tier-divider::after {
+            content: '';
+            flex-grow: 1;
+            height: 1px;
+            background: var(--border-color);
+            margin-left: 15px;
+            opacity: 0.5;
+        }
+
+        /* 구분선 아이콘 */
+        .tier-divider i {
+            margin-right: 8px;
+            color: var(--accent-gold);
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        (function () {
+            // 기존 테마 로직 유지
+            const savedTheme = localStorage.getItem('infinite_theme');
+            if (savedTheme) {
+                document.body.classList.add(savedTheme + '-mode');
+            }
+        })();
+    </script>
+
+    <div class="app-container">
+
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h1 class="brand-logo"><i class="fa-solid fa-infinity"></i> 무한섬</h1>
+            </div>
+
+            <ul class="menu-list">
+                <li><a href="index.html" class="menu-item"><i class="fa-solid fa-house"></i> 대시보드</a></li>
+                <li><a href="attendance.html" class="menu-item"><i class="fa-solid fa-clipboard-check"></i> 출/퇴근 관리</a>
+                </li>
+                <li><a href="draft.html" class="menu-item"><i class="fa-solid fa-people-group"></i> 팀 드래프트</a></li>
+                <li><a href="score.html" class="menu-item"><i class="fa-solid fa-trophy"></i> 경기 점수판</a></li>
+                <li><a href="hall_of_fame.html" class="menu-item"><i class="fa-solid fa-crown"></i> 우승 기록</a></li>
+                <li><a href="profile.html" class="menu-item"><i class="fa-solid fa-user-tag"></i> 개인 기록</a></li>
+                <li><a href="streamers.html" class="menu-item active"><i class="fa-solid fa-users-viewfinder"></i> 스트리머 리더보드</a></li>
+                <li><a href="tiers.html" class="menu-item"><i class="fa-solid fa-ranking-star"></i> 선수 티어표</a></li>
+                <li><a href="inquiry.html" class="menu-item"><i class="fa-solid fa-envelope"></i> 관리자 문의</a></li>
+            </ul>
+
+            <div style="margin-top: auto; padding-top: 20px; border-top: 1px solid #333;">
+                <a href="#" id="themeToggleBtn" class="menu-item">
+                    <i class="fa-solid fa-moon"></i> 다크 모드
+                </a>
+                <a href="#" id="logoutBtn" class="menu-item" style="color: #ff4757;">
+                    <i class="fa-solid fa-right-from-bracket"></i> 로그아웃
+                </a>
+            </div>
+
+            <div class="sidebar-footer">
+                <p>Designed for Eternal Return</p>
+            </div>
+        </nav>
+
+        <main class="content-area">
+
+            <header class="dashboard-header">
+                <div class="header-left">
+                    <h2 class="page-title">스트리머 리더보드</h2>
+                    <p class="current-date" style="color:#888;">등록된 스트리머 목록 및 전적 검색</p>
+                </div>
+                <div class="header-right" style="display: flex; gap: 15px; align-items: center;">
+
+                    <div class="sort-group">
+                        <button class="sort-btn" id="btnSortTier">티어순</button>
+                        <button class="sort-btn active" id="btnSortName">이름순</button>
+                    </div>
+
+                    <div class="search-box">
+                        <input type="text" id="searchInput" placeholder="스트리머 또는 닉네임 검색...">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                </div>
+            </header>
+
+            <div class="streamer-grid" id="streamerGrid" style="padding: 20px 0;">
+                <div class="loading-spinner" style="grid-column: 1/-1; text-align:center; padding:50px; color:#aaa;">
+                    <i class="fa-solid fa-spinner fa-spin"></i> 데이터를 불러오는 중...
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script type="module" src="assets/js/streamers.js"></script>
+
+    <script type="module">
+        import { initTheme, setupThemeToggle } from './assets/js/theme-manager.js';
+        // 만약 auth.js에 로그아웃 기능이 있다면 그것도 import 해야 합니다.
+        // import { setupLogout } from './assets/js/auth.js'; 
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initTheme();
+            setupThemeToggle();
+        });
+    </script>
+</body>
+
+</html>

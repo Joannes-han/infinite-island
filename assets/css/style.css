@@ -1,4 +1,28 @@
 /* assets/css/style.css */
+/* =========================================================
+   [1단계] 이 코드를 CSS 파일 "맨 윗줄"에 붙여넣으세요!
+   ========================================================= */
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css");
+
+:root {
+    --bg-main: #121212;       /* 전체 배경 */
+    --bg-sidebar: #1e1e1e;    /* 사이드바 배경 */
+    --bg-panel: #252525;      /* 패널 배경 */
+    --bg-card: #252525;       /* 카드 배경 */
+    --bg-hover: #333333;      /* 호버 배경 */
+    --bg-card-hover: #2a2a2a; /* 카드 호버 배경 */
+    
+    --text-main: #ffffff;     /* 흰색 글자 */
+    --text-muted: #aaaaaa;    /* 회색 글자 */
+    
+    --accent-gold: #f1c40f;          /* 강조색 (노랑) */
+    --accent-gold-dim: rgba(241, 196, 15, 0.1); 
+    --accent-color: #f1c40f;         
+    
+    --border-color: rgba(255, 255, 255, 0.1);
+    
+    --sidebar-width: 260px;
+}
 
 /* 1. 기본 초기화 */
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -227,3 +251,353 @@ ul { list-style: none; }
 .btn-secondary { background: transparent; color: #888; border: 1px solid #444; }
 .btn-secondary:hover { color: #ccc; border-color: #666; }
 @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+
+/* ============================================================
+   [수정] 티어표 선수 카드 (왼쪽 꽉 채우는 네모 이미지 버전)
+   ============================================================ */
+
+/* 1. 카드 전체 틀 */
+.player-card {
+    display: inline-flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    padding: 0 10px 0 0 !important; /* 왼쪽 여백 0 */
+    gap: 8px !important;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    margin: 2px;
+    cursor: grab;
+    overflow: hidden !important;
+}
+
+.tier-player-img {
+    margin: 0 !important;
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 0 !important; /* 네모 */
+    object-fit: cover;
+    display: block;
+}
+
+.tier-player-placeholder {
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 0 !important;
+    background-color: rgba(255,255,255,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    color: #aaa;
+}
+
+/* 4. 이름 텍스트 (기존 유지) */
+.player-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+/* =========================================
+   [NEW] 스트리머 리더보드 페이지 스타일
+   ========================================= */
+
+/* =========================================================
+   [3단계] 이 코드를 CSS 파일 "맨 마지막 줄"에 추가하세요!
+   ========================================================= */
+
+/* 스트리머 리더보드 그리드 */
+.streamer-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
+    gap: 20px;
+    padding-bottom: 50px;
+}
+
+/* 스트리머 카드 */
+.streamer-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 20px 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.2s;
+    position: relative;
+    overflow: hidden;
+}
+
+.streamer-card:hover {
+    transform: translateY(-5px);
+    background-color: var(--bg-card-hover);
+    border-color: var(--accent-color);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+}
+
+/* 프로필 이미지 */
+.st-img, .st-img-placeholder {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 12px;
+    border: 3px solid rgba(255,255,255,0.1);
+    background-color: #333;
+}
+
+.st-img-placeholder {
+    display: flex; align-items: center; justify-content: center; font-size: 2rem; color: #555;
+}
+
+/* 텍스트 정보 */
+.st-info { width: 100%; margin-bottom: 15px; }
+.st-name { font-size: 1.2rem; font-weight: 800; color: var(--text-main); margin-bottom: 6px; }
+.st-ingame {
+    font-size: 0.9rem; color: var(--text-muted);
+    background: rgba(0,0,0,0.3); padding: 4px 10px; border-radius: 20px; display: inline-block;
+}
+.st-ingame i { font-size: 0.8rem; margin-right: 4px; color: #777; }
+
+/* 하단 액션 */
+.st-action {
+    margin-top: auto; font-size: 0.85rem; color: var(--accent-color);
+    font-weight: 600; opacity: 0; transform: translateY(10px); transition: all 0.3s;
+}
+.streamer-card:hover .st-action { opacity: 1; transform: translateY(0); }
+
+/* 티어 배지 */
+.st-tier {
+    position: absolute; top: 12px; right: 12px; font-size: 0.75rem; font-weight: bold;
+    padding: 2px 6px; border-radius: 4px; background: #333; color: #fff;
+}
+.badge-sss { background: #ff4757; color: #fff; }
+.badge-ss { background: #ffa502; color: #000; }
+.badge-s { background: #2ed573; color: #000; }
+.badge-a { background: #1e90ff; }
+.badge-b { background: #747d8c; }
+.badge-c { background: #a4b0be; color: #000; }
+.badge-f { background: #57606f; }
+
+/* =========================================
+   [NEW] 출퇴근 슬림 카드 디자인
+   ========================================= */
+
+/* 그리드 레이아웃 (반응형) */
+.attendance-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* 적당한 너비 */
+    gap: 12px;
+    padding: 10px;
+}
+
+/* 1. 카드 기본 스타일 */
+.att-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 10px 15px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+    position: relative;
+    overflow: hidden;
+}
+
+/* 2. 상태별 스타일 (출근 vs 퇴근) */
+
+/* [출근 상태] - 밝고 선명하게 */
+.att-card.status-in {
+    background-color: rgba(46, 213, 115, 0.1); /* 연한 초록 배경 */
+    border-color: #2ed573;
+    box-shadow: 0 0 10px rgba(46, 213, 115, 0.2);
+}
+.att-card.status-in .status-led {
+    background-color: #2ed573;
+    box-shadow: 0 0 8px #2ed573;
+}
+.att-card.status-in .status-text { color: #2ed573; }
+
+
+/* [퇴근 상태] - 약간 어둡고 차분하게 */
+.att-card.status-out {
+    background-color: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.1);
+    opacity: 0.7; /* 살짝 투명하게 해서 출근자가 돋보이게 */
+}
+.att-card.status-out:hover {
+    opacity: 1;
+    background-color: var(--bg-hover);
+    border-color: #ff4757; /* 호버 시 빨간 테두리 힌트 */
+}
+.att-card.status-out .status-led {
+    background-color: #ff4757; /* 빨간불 */
+    box-shadow: none;
+}
+.att-card.status-out .status-text { color: #ff4757; }
+
+
+/* 3. 내부 요소 배치 */
+.att-card-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.att-card-right {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+/* 이미지 */
+.att-card-img, .att-card-img-placeholder {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(255,255,255,0.1);
+}
+.att-card-img-placeholder {
+    display: flex; align-items: center; justify-content: center;
+    background: #333; color: #777;
+}
+
+/* 텍스트 정보 */
+.att-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.att-name {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--text-main);
+}
+.att-tier {
+    font-size: 0.7rem;
+    padding: 1px 6px;
+    border-radius: 4px;
+    width: fit-content;
+    background: #444; color: #fff;
+}
+
+/* LED 조명 */
+.status-led {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    transition: 0.3s;
+}
+.status-text {
+    font-size: 0.7rem;
+    font-weight: bold;
+}
+
+/* =========================================
+   [NEW] 티어 그룹핑 스타일
+   ========================================= */
+
+/* 티어 그룹들을 세로로 쌓는 컨테이너 */
+.tier-stack-container {
+    display: flex;
+    flex-direction: column;
+    gap: 25px; /* 그룹 간 간격 */
+    
+    /* ★ 해결 1: 상단 여백 추가 (SSS 티어가 헤더에 붙는 문제 해결) */
+    padding-top: 25px; 
+    padding-bottom: 50px; /* 하단 여백도 넉넉하게 */
+    padding-left: 10px;   /* 좌우 여백 */
+    padding-right: 10px;
+
+    /* ★ 해결 2: 스크롤 추가 (내용이 길어지면 드래그/스크롤 가능하게) */
+    height: 100%;           /* 부모 높이를 꽉 채움 */
+    max-height: 70vh;       /* 화면 높이의 70%까지만 차지하고 그 이상은 스크롤 */
+    overflow-y: auto;       /* 세로 스크롤 활성화 */
+    
+    /* (선택사항) 스크롤바 디자인 예쁘게 */
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent-gold) var(--bg-panel);
+}
+
+/* (웹킷 브라우저용 스크롤바 스타일) */
+.tier-stack-container::-webkit-scrollbar {
+    width: 8px;
+}
+.tier-stack-container::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+}
+.tier-stack-container::-webkit-scrollbar-thumb {
+    background-color: #555;
+    border-radius: 4px;
+}
+.tier-stack-container::-webkit-scrollbar-thumb:hover {
+    background-color: var(--accent-gold);
+}
+
+/* 개별 티어 그룹 래퍼 */
+.tier-group-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* 헤더와 카드 사이 간격 조금 더 벌림 */
+}
+
+/* (나머지 스타일은 그대로 유지) */
+.tier-group-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-left: 10px;
+    border-left: 3px solid var(--accent-gold); 
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--text-main);
+}
+
+.tier-name {
+    text-transform: uppercase; /* 영어일 경우 대문자 */
+}
+
+.tier-count {
+    background: rgba(255,255,255,0.1);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+/* 카드 그리드 (그룹 내부) */
+.attendance-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+}
+
+/* =========================================
+   [NEW] 빈 티어 표시 스타일
+   ========================================= */
+.empty-tier-msg {
+    grid-column: 1 / -1; /* 그리드 전체 너비 차지 */
+    padding: 15px;
+    text-align: center;
+    color: var(--text-muted); /* 회색 */
+    font-size: 0.9rem;
+    background: rgba(255, 255, 255, 0.02); /* 아주 연한 배경 */
+    border-radius: 8px;
+    border: 1px dashed rgba(255, 255, 255, 0.1); /* 점선 테두리 */
+}
+
+/* 스크롤바 */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-main); }
+::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }

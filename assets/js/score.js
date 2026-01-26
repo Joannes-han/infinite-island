@@ -95,7 +95,7 @@ function renderInputTable() {
 
     if (!tbody || !headerRow) return;
 
-    // 헤더 라운드(R1, R2...) 갱신
+    // 헤더 라운드 갱신
     headerRow.querySelectorAll('.col-round').forEach(el => el.remove());
     for (let r = 1; r <= maxRound; r++) {
         const th = document.createElement('th');
@@ -106,35 +106,37 @@ function renderInputTable() {
 
     tbody.innerHTML = '';
 
-    // 팀 ID 순으로 정렬
+    // 팀 ID 순 정렬
     const sortedTeams = Object.values(teamsMap).sort((a, b) => a.id - b.id);
 
     sortedTeams.forEach(team => {
-        // 현재 총점 계산
+        // 총점 계산
         let total = 0;
         const roundScores = {};
-        
-        // 내 팀의 점수만 필터링
         scoresData.filter(s => s.team_id === team.id).forEach(s => {
             roundScores[s.round_num] = s.score;
             total += s.score;
         });
 
         const tr = document.createElement('tr');
+        
         tr.innerHTML = `
             <td>
-                <div>Team ${team.id}</div>
-                <span class="team-members-small">${team.members.join(', ')}</span>
+                <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:2px;">
+                    Team ${team.id}
+                </div>
+
+                <div style="font-size:1.05rem; font-weight:800; color:var(--text-main);">
+                    ${team.members.join(', ')}
+                </div>
             </td>
-            <td class="col-total-preview" id="preview-total-${team.id}">${total}</td>
+            <td class="col-total-preview" id="preview-total-${team.id}" style="font-weight:bold; color:var(--accent-gold);">${total}</td>
         `;
 
-        // 라운드별 입력칸 생성
+        // 라운드별 입력칸
         for (let r = 1; r <= maxRound; r++) {
             const score = roundScores[r] || 0;
             const td = document.createElement('td');
-            
-            // 입력칸 (값이 바뀔 때마다 DB 저장)
             td.innerHTML = `
                 <input type="number" class="score-input" 
                     data-team="${team.id}" data-round="${r}" 
@@ -146,7 +148,7 @@ function renderInputTable() {
         tbody.appendChild(tr);
     });
 
-    // 입력 이벤트 연결 ('change' 사용: 입력 후 엔터 치거나 포커스 잃으면 저장)
+    // 이벤트 연결
     document.querySelectorAll('.score-input').forEach(input => {
         input.addEventListener('change', handleScoreChange);
     });
@@ -154,7 +156,7 @@ function renderInputTable() {
 
 
 // ============================================================
-// ★ 2. [왼쪽] 순위표 그리기 (총점 순서 자동 정렬)
+// ★ 2. [왼쪽] 순위표 그리기 (총점순 자동 정렬)
 // ============================================================
 function renderLeaderboard() {
     const tbody = document.getElementById('leaderboardBody');
@@ -169,16 +171,16 @@ function renderLeaderboard() {
         rankingList.push({ ...team, total });
     });
 
-    // 점수 내림차순 정렬 (동점일 경우 팀 ID 빠른 순)
+    // 점수 내림차순 정렬
     rankingList.sort((a, b) => b.total - a.total || a.id - b.id);
 
-    // 체크포인트 설정 값 확인
+    // 체크포인트 설정 확인
     const toggle = document.getElementById('checkpointToggle');
     const isCpEnabled = toggle ? toggle.checked : false;
     const targetInput = document.getElementById('checkpointTarget');
     const cpTarget = targetInput ? (parseInt(targetInput.value) || 50) : 50;
 
-    // 체크포인트 헤더 보이기/숨기기
+    // 헤더 처리
     const cpHeader = document.querySelector('.section-leaderboard .col-check');
     if (cpHeader) cpHeader.style.display = isCpEnabled ? 'table-cell' : 'none';
 
@@ -186,29 +188,33 @@ function renderLeaderboard() {
         const isReached = team.total >= cpTarget;
         const tr = document.createElement('tr');
 
-        // 1,2,3등 행 강조
+        // 1~3위 강조
         if (index === 0) tr.classList.add('rank-row-1');
         if (index === 1) tr.classList.add('rank-row-2');
         if (index === 2) tr.classList.add('rank-row-3');
 
-        // 체크포인트 달성 강조
+        // 체크포인트 강조
         if (isCpEnabled && isReached) tr.classList.add('checkpoint-reached');
 
         tr.innerHTML = `
             <td class="col-rank rank-${index + 1}">${index + 1}</td>
             <td class="col-team">
-                <div style="font-weight:bold;">Team ${team.id}</div>
-                <span class="team-members-small" style="font-size:11px; color:#888;">${team.members.join(', ')}</span>
+                <span class="team-name" style="display:block; font-size:0.8rem; color:var(--text-muted); margin-bottom:2px;">
+                    Team ${team.id}
+                </span>
+
+                <div style="font-size:1.1rem; font-weight:800; color:var(--text-main); line-height:1.2;">
+                    ${team.members.join(', ')}
+                </div>
             </td>
             <td class="col-check" style="display: ${isCpEnabled ? 'table-cell' : 'none'}">
-                ${isReached ? '<i class="fa-solid fa-fire"></i>' : ''}
+                ${isReached ? '<i class="fa-solid fa-fire" style="color:#ff4757"></i>' : ''}
             </td>
-            <td class="col-total">${team.total}</td>
+            <td class="col-total" style="font-weight:bold; font-size:1.2rem;">${team.total}</td>
         `;
         tbody.appendChild(tr);
     });
-}
-
+}   
 
 // ============================================================
 // ★ 3. 점수 변경 핸들러 (DB 실시간 저장)

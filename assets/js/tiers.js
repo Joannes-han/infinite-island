@@ -61,7 +61,7 @@ async function loadPlayers() {
 }
 
 // ==========================================
-// 3. 카드 생성 함수 (★ 사진 제거됨)
+// 3. 카드 생성 함수 (★ 이미지 추가 버전)
 // ==========================================
 function createPlayerCard(player) {
     const div = document.createElement('div');
@@ -71,9 +71,18 @@ function createPlayerCard(player) {
     div.dataset.id = player.id;
     div.dataset.name = player.name; 
 
-    // ★ [수정] 이미지를 없애고 텍스트만 넣습니다.
-    // 기존 디자인이 깨지지 않도록 이름만 깔끔하게 출력
-    div.textContent = player.name;
+    // ★ [수정됨] 텍스트만 넣던 것을 -> 이미지 HTML 포함으로 변경
+    
+    // 1. 이미지가 있으면 img 태그, 없으면 기본 아이콘
+    const imgHtml = player.image_url 
+        ? `<img src="${player.image_url}" class="tier-player-img" alt="${player.name}" draggable="false">` 
+        : `<div class="tier-player-placeholder"><i class="fa-solid fa-user"></i></div>`;
+
+    // 2. HTML 조립 (이미지 + 이름)
+    div.innerHTML = `
+        ${imgHtml}
+        <span class="player-name">${player.name}</span>
+    `;
 
     // 드래그 가능하게 설정
     div.draggable = true;
