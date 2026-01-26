@@ -1,38 +1,74 @@
 import { supabase } from './supabase.js';
+import { initTheme, setupThemeToggle } from './theme-manager.js';
 
-// 전역 변수로 데이터 저장
+// 전역 변수
 let allPlayers = [];
-// ★ 수정 1: 기본 정렬 모드를 'tier'로 변경
-let currentSortMode = 'tier'; 
+let currentSortMode = 'tier'; // 기본 정렬: 티어순
 
-document.addEventListener('DOMContentLoaded', () => {
-    applySavedTheme(); 
+document.addEventListener('DOMContentLoaded', async () => {
+    // 1. 테마 초기화
+    if (typeof initTheme === 'function') initTheme();
+    if (typeof setupThemeToggle === 'function') setupThemeToggle();
+
+    // ============================================================
+    // ★ [핵심] 로그인 여부에 따라 '메뉴'와 '버튼' 보여주기
+    // ============================================================
+    const { data: { session } } = await supabase.auth.getSession();
     
-    // 버튼 초기 상태 설정 (티어순이 Active 되도록)
+    const loginBtn = document.getElementById('loginBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    
+    // 숨겨진 메뉴들 가져오기
+    const authItems = document.querySelectorAll('.auth-required');
+
+    if (session) {
+        // [로그인 O] 
+        // 1. 로그아웃 버튼 켜기
+        if (logoutBtn) logoutBtn.style.display = 'flex';
+        setupLogout(); 
+
+        // 2. 숨겨진 관리자 메뉴들 싹 다 보여주기
+        authItems.forEach(item => item.style.display = 'block');
+
+    } else {
+        // [로그인 X] 
+        // 1. 로그인 버튼 켜기
+        if (loginBtn) loginBtn.style.display = 'flex';
+        
+        // 2. 관리자 메뉴는 이미 HTML에서 display: none 되어 있으므로 그대로 둠
+    }
+
+    // 2. 정렬 버튼 초기 상태 설정
     updateSortButtonState();
 
-    loadStreamers();   
-    setupSearch();     
-    setupThemeToggle(); 
-    setupLogout();     
+    // 3. 정렬 버튼 이벤트 연결
+    const btnName = document.getElementById('btnSortName');
+    const btnTier = document.getElementById('btnSortTier');
+    if(btnName) btnName.addEventListener('click', () => setSortMode('name'));
+    if(btnTier) btnTier.addEventListener('click', () => setSortMode('tier'));
 
-    // 정렬 버튼 이벤트 연결
-    document.getElementById('btnSortName').addEventListener('click', () => setSortMode('name'));
-    document.getElementById('btnSortTier').addEventListener('click', () => setSortMode('tier'));
+    // 4. 데이터 불러오기
+    loadStreamers();
+    
+    // 5. 검색 기능 연결
+    setupSearch();
 });
 
-// 정렬 모드 변경 함수
+// ============================================================
+// 정렬 모드 변경
+// ============================================================
 function setSortMode(mode) {
     currentSortMode = mode;
     updateSortButtonState();
     renderStreamers(allPlayers);
 }
 
-// 버튼 스타일 업데이트 함수
 function updateSortButtonState() {
     const btnName = document.getElementById('btnSortName');
     const btnTier = document.getElementById('btnSortTier');
     
+    if (!btnName || !btnTier) return;
+
     if (currentSortMode === 'name') {
         btnName.classList.add('active');
         btnTier.classList.remove('active');
@@ -42,11 +78,14 @@ function updateSortButtonState() {
     }
 }
 
-// 데이터 불러오기
+// ============================================================
+// 데이터 불러오기 (함수명: loadStreamers)
+// ============================================================
 async function loadStreamers() {
     const grid = document.getElementById('streamerGrid');
     if (!grid) return;
 
+    // DB에서 가져오기
     const { data: players, error } = await supabase
         .from('players')
         .select('*')
@@ -62,9 +101,13 @@ async function loadStreamers() {
     renderStreamers(allPlayers);
 }
 
-// ★ 화면 그리기 함수
+// ============================================================
+// 화면 그리기 (티어순 / 이름순)
+// ============================================================
 function renderStreamers(players) {
     const grid = document.getElementById('streamerGrid');
+    if (!grid) return;
+    
     grid.innerHTML = ''; 
 
     if (players.length === 0) {
@@ -72,29 +115,32 @@ function renderStreamers(players) {
         return;
     }
 
-    // A. 이름순 정렬 모드
+    // [A] 이름순 정렬 모드
     if (currentSortMode === 'name') {
         const sorted = [...players].sort((a, b) => a.name.localeCompare(b.name));
         sorted.forEach(player => {
-            const card = createCard(player);
-            grid.appendChild(card);
+            grid.appendChild(createCard(player));
         });
     } 
-    // B. 티어순 정렬 모드
+    // [B] 티어순 정렬 모드
     else {
-        // ★ 수정 2: '나뭇가지', '닭' 추가 (높은 티어 -> 낮은 티어 순서)
-        const tierOrder = ['SSS', 'SS', 'S', 'A', 'B', 'C', 'D', 'F', '나뭇가지', '닭'];
+        // 티어 순서 정의
+        const tierOrder = ['SSS', 'SS', 'S', 'A', 'B', 'C', 'D', 'F', '닭', '나뭇가지'];
         
         tierOrder.forEach(tier => {
-            // 해당 티어인 선수들만 필터링
-            const group = players.filter(p => p.tier === tier);
+            // 해당 티어인 선수들만 필터링 (영어/한글 처리)
+            const group = players.filter(p => {
+                let pTier = p.tier ? p.tier.trim() : '';
+                if (pTier === 'Chicken') pTier = '닭';
+                if (pTier === 'Stick') pTier = '나뭇가지';
+                return pTier === tier;
+            });
             
             if (group.length > 0) {
                 // (1) 구분선 추가
                 const divider = document.createElement('div');
                 divider.className = 'tier-divider';
                 
-                // 나뭇가지/닭 일때는 아이콘을 조금 다르게 (선택사항)
                 let icon = '<i class="fa-solid fa-ranking-star"></i>';
                 if(tier === '닭') icon = '<i class="fa-solid fa-drumstick-bite"></i>';
                 if(tier === '나뭇가지') icon = '<i class="fa-solid fa-tree"></i>';
@@ -102,19 +148,18 @@ function renderStreamers(players) {
                 divider.innerHTML = `${icon} ${tier} Tier`;
                 grid.appendChild(divider);
 
-                // (2) 카드 추가 (내부에서 이름순 정렬)
+                // (2) 카드 추가 (내부 이름순)
                 group.sort((a, b) => a.name.localeCompare(b.name)).forEach(p => {
-                    const card = createCard(p);
-                    grid.appendChild(card);
+                    grid.appendChild(createCard(p));
                 });
             }
         });
-
-        // ★ 수정 2: '언랭크(미배정)'는 아예 렌더링하지 않음 (코드 삭제됨)
     }
 }
 
-// 카드 생성 함수
+// ============================================================
+// 카드 HTML 생성 함수
+// ============================================================
 function createCard(player) {
     const card = document.createElement('div');
     card.className = 'streamer-card';
@@ -154,7 +199,9 @@ function createCard(player) {
     return card;
 }
 
+// ============================================================
 // 검색 기능
+// ============================================================
 function setupSearch() {
     const input = document.getElementById('searchInput');
     if (!input) return;
@@ -183,47 +230,25 @@ function setupSearch() {
     });
 }
 
-// ===================== (기존 테마/로그아웃 유지) =====================
-
-function applySavedTheme() {
-    const savedTheme = localStorage.getItem('infinite_theme');
-    if (savedTheme === 'dark') document.body.classList.add('dark-mode');
-    else document.body.classList.remove('dark-mode');
-    updateThemeIcon();
-}
-
-function setupThemeToggle() {
-    const themeBtn = document.getElementById('themeToggleBtn');
-    if (!themeBtn) return;
-    themeBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        const isDarkMode = document.body.classList.toggle('dark-mode');
-        localStorage.setItem('infinite_theme', isDarkMode ? 'dark' : 'light');
-        updateThemeIcon();
-    });
-}
-
-function updateThemeIcon() {
-    const themeBtn = document.getElementById('themeToggleBtn');
-    if (!themeBtn) return;
-    const icon = themeBtn.querySelector('i');
-    if (document.body.classList.contains('dark-mode')) {
-        if(icon) icon.className = 'fa-solid fa-sun';
-        themeBtn.innerHTML = '<i class="fa-solid fa-sun"></i> 라이트 모드';
-    } else {
-        if(icon) icon.className = 'fa-solid fa-moon';
-        themeBtn.innerHTML = '<i class="fa-solid fa-moon"></i> 다크 모드';
-    }
-}
-
+// ============================================================
+// 로그아웃 기능
+// ============================================================
 function setupLogout() {
     const logoutBtn = document.getElementById('logoutBtn');
     if (!logoutBtn) return;
-    logoutBtn.addEventListener('click', async (e) => {
+
+    // 이벤트 중복 방지를 위해 기존 리스너 제거 방식 대신, onclick 속성 사용 고려
+    // 또는 단순하게 addEventListener 사용 (여기서는 단순화)
+    logoutBtn.onclick = async (e) => {
         e.preventDefault();
         if (confirm("정말 로그아웃 하시겠습니까?")) {
             const { error } = await supabase.auth.signOut();
-            window.location.href = 'login.html'; 
+            if (!error) {
+                // 로그아웃 후 새로고침 (그러면 로그인 버튼이 보이게 됨)
+                window.location.reload();
+            } else {
+                alert("로그아웃 실패");
+            }
         }
-    });
+    };
 }
