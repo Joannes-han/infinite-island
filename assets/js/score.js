@@ -178,7 +178,7 @@ function renderLeaderboard() {
     const toggle = document.getElementById('checkpointToggle');
     const isCpEnabled = toggle ? toggle.checked : false;
     const targetInput = document.getElementById('checkpointTarget');
-    const cpTarget = targetInput ? (parseInt(targetInput.value) || 50) : 50;
+    const cpTarget = targetInput ? (parseFloat(targetInput.value) || 50) : 50;
 
     // 헤더 처리
     const cpHeader = document.querySelector('.section-leaderboard .col-check');
@@ -221,12 +221,12 @@ function renderLeaderboard() {
 // ============================================================
 async function handleScoreChange(e) {
     const input = e.target;
-    const teamId = parseInt(input.dataset.team);
-    const round = parseInt(input.dataset.round);
+    const teamId = parseFloat(input.dataset.team);
+    const round = parseFloat(input.dataset.round);
 
     // 빈칸이면 0으로 처리
     const inputValue = input.value.trim();
-    const newScore = inputValue === '' ? 0 : parseInt(inputValue);
+    const newScore = inputValue === '' ? 0 : parseFloat(inputValue);
 
     // 로컬 데이터에서 해당 기록 찾기
     const existingIndex = scoresData.findIndex(s => s.team_id === teamId && s.round_num === round);
@@ -361,7 +361,7 @@ function setupEvents() {
             if (!fetchError && history.length > 0) {
                 const rounds = history.map(h => {
                     const match = h.team_name.match(/(\d+)회차/);
-                    return match ? parseInt(match[1]) : 0;
+                    return match ? parseFloat(match[1]) : 0;
                 });
                 const maxR = Math.max(...rounds);
                 nextRoundNum = maxR + 1;
