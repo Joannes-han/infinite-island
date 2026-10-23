@@ -1,5 +1,6 @@
 import { supabase } from './supabase.js';
 import { initTheme, setupThemeToggle } from './theme-manager.js';
+import { escapeHtml, safeHttpUrl } from './safe-render.js';
 
 // 전역 변수
 let allPlayers = [];
@@ -170,25 +171,27 @@ function createCard(player) {
             const searchName = player.ingame_name || player.name;
             targetUrl = `https://dak.gg/er/players/${encodeURIComponent(searchName)}`;
         }
-        window.open(targetUrl, '_blank');
+        const safeUrl = safeHttpUrl(targetUrl);
+        if (safeUrl) window.open(safeUrl, '_blank', 'noopener,noreferrer');
     });
 
-    const imgHtml = player.image_url 
-        ? `<img src="${player.image_url}" alt="${player.name}" class="st-img">`
+    const imageUrl = safeHttpUrl(player.image_url);
+    const imgHtml = imageUrl
+        ? `<img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(player.name)}" class="st-img">`
         : `<div class="st-img-placeholder"><i class="fa-solid fa-user"></i></div>`;
 
     const tierBadge = player.tier 
-        ? `<span class="st-tier badge-${player.tier.toLowerCase()}">${player.tier}</span>` 
+        ? `<span class="st-tier badge-${escapeHtml(player.tier.toLowerCase())}">${escapeHtml(player.tier)}</span>`
         : '';
 
     card.innerHTML = `
         ${imgHtml}
         ${tierBadge}
         <div class="st-info">
-            <div class="st-name">${player.name}</div>
+            <div class="st-name">${escapeHtml(player.name)}</div>
             <div class="st-ingame">
                 <i class="fa-solid fa-gamepad"></i> 
-                ${player.ingame_name || '-'}
+                ${escapeHtml(player.ingame_name || '-')}
             </div>
         </div>
         <div class="st-action">

@@ -1,5 +1,6 @@
 import { supabase } from './supabase.js';
 import { initTheme, setupThemeToggle } from './theme-manager.js';
+import { escapeHtml, safeHttpUrl } from './safe-render.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     initTheme();
@@ -99,7 +100,7 @@ async function loadHallOfFameStats() {
         const { data: history, error } = await supabase.from('hall_of_fame').select('*');
         const { data: profiles } = await supabase.from('players').select('name, image_url'); 
         
-        const imgMap = {};
+        const imgMap = Object.create(null);
         if (profiles) {
             profiles.forEach(p => { if(p.name) imgMap[p.name] = p.image_url; });
         }
@@ -110,7 +111,7 @@ async function loadHallOfFameStats() {
         }
 
         // 1. 데이터 전처리 (Raw Data 집계)
-        const stats = {};
+        const stats = Object.create(null);
         const parseMembers = (str) => {
             if (!str) return [];
             return str.split(',').map(s => s.trim()).filter(s => s.length > 0);
@@ -209,15 +210,15 @@ function renderStats(result) {
     const fallbackImg = "https://placehold.co/100x100?text=No+Image"; 
 
     // 2. DB 이미지가 없으면 임시 이미지 사용
-    const imgSrc = data.img ? data.img : fallbackImg;
+    const imgSrc = safeHttpUrl(data.img) || fallbackImg;
     
     return `
         <div style="display:flex; align-items:center; gap:15px;">
-            <img src="${imgSrc}" 
+            <img src="${escapeHtml(imgSrc)}"
                  style="width:55px; height:55px; border-radius:50%; object-fit:cover; border:2px solid #333; background:#222;" 
                  onerror="this.src='${fallbackImg}'"> <div style="display:flex; flex-direction:column; justify-content:center;">
-                <span class="stat-name" style="font-size:1.1rem; font-weight:bold; color:var(--text-main); margin-bottom:2px;">${data.name}</span>
-                <span class="stat-value" style="font-size:0.95rem; color:var(--text-muted);">${data.val} ${unit}</span>
+                <span class="stat-name" style="font-size:1.1rem; font-weight:bold; color:var(--text-main); margin-bottom:2px;">${escapeHtml(data.name)}</span>
+                <span class="stat-value" style="font-size:0.95rem; color:var(--text-muted);">${escapeHtml(data.val)} ${unit}</span>
             </div>
         </div>
     `;
@@ -311,10 +312,10 @@ function renderPodium(ranking) {
         div.innerHTML = `
             <div class="p-rank r-${index + 1}">${index + 1}</div>
             <div class="p-info">
-                <div class="p-team">${team.team}</div>
-                <div style="font-size:0.8rem; color:var(--text-muted);">${team.members}</div>
+                <div class="p-team">${escapeHtml(team.team)}</div>
+                <div style="font-size:0.8rem; color:var(--text-muted);">${escapeHtml(team.members)}</div>
             </div>
-            <div class="p-score">${team.score}</div>
+            <div class="p-score">${escapeHtml(team.score)}</div>
         `;
         container.appendChild(div);
     });
@@ -333,10 +334,10 @@ function renderRankingList(ranking) {
         tr.innerHTML = `
             <td><span style="font-weight:800; font-size:1.1rem;">${index + 1}</span></td>
             
-            <td style="font-weight:600; color: var(--text-main);">${team.team}</td>
+            <td style="font-weight:600; color: var(--text-main);">${escapeHtml(team.team)}</td>
             
-            <td style="color:var(--text-muted); font-size:0.9rem;">${team.members}</td>
-            <td style="font-weight:800; color:var(--accent-gold);">${team.score}</td>
+            <td style="color:var(--text-muted); font-size:0.9rem;">${escapeHtml(team.members)}</td>
+            <td style="font-weight:800; color:var(--accent-gold);">${escapeHtml(team.score)}</td>
             <td style="font-size:0.85rem; color:${team.gapColor};">${team.gapText}</td>
         `;
         tbody.appendChild(tr);
@@ -353,7 +354,7 @@ function renderLastWinner(winner) {
     if (winner) {
         box.innerHTML = `
             <div class="winner-members" style="color:var(--accent-gold); font-size:1.4rem; font-weight:800; line-height:1.4; margin-bottom:8px; word-break:keep-all;">
-                ${winner.members || '-'}
+                ${escapeHtml(winner.members || '-')}
             </div>
             <div style="font-size:0.85rem; color:var(--text-muted); display:flex; align-items:center; justify-content:center; gap:5px;">
                 <i class="fa-solid fa-trophy"></i> ${new Date(winner.created_at).toLocaleDateString()} 우승

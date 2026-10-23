@@ -1,4 +1,5 @@
 import { supabase } from './supabase.js';
+import { escapeHtml, safeHttpUrl } from './safe-render.js';
 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -41,7 +42,7 @@ async function loadDashboardData() {
 
 // 2. ★ 추가: 최다 우승자 계산 및 표시 함수
 function updateMVP(history, players) {
-    const winCounts = {};
+    const winCounts = Object.create(null);
 
     // 우승 횟수 카운팅
     history.forEach(record => {
@@ -71,8 +72,9 @@ function updateMVP(history, players) {
     const imgUrl = mvpData ? mvpData.image_url : null;
 
     // 이미지 HTML 생성
-    const imgHtml = imgUrl 
-        ? `<img src="${imgUrl}" alt="${mvpName}">` 
+    const safeImageUrl = safeHttpUrl(imgUrl);
+    const imgHtml = safeImageUrl
+        ? `<img src="${escapeHtml(safeImageUrl)}" alt="${escapeHtml(mvpName)}">`
         : `<i class="fa-solid fa-user"></i>`;
 
     // 화면 그리기
@@ -81,7 +83,7 @@ function updateMVP(history, players) {
         <div class="mvp-img-box">
             ${imgHtml}
         </div>
-        <div class="mvp-name">${mvpName}</div>
+        <div class="mvp-name">${escapeHtml(mvpName)}</div>
         <div class="mvp-count-badge">
             <i class="fa-solid fa-trophy"></i> 총 ${maxWins}회 우승
         </div>
@@ -178,8 +180,8 @@ function updateLiveRank(scores) {
         container.innerHTML = `
             <div class="live-rank-1">
                 <i class="fa-solid fa-crown rank-badge"></i>
-                <div class="live-team-name">Team ${teamId}</div>
-                <div class="live-score">${score} pts</div>
+                <div class="live-team-name">Team ${escapeHtml(teamId)}</div>
+                <div class="live-score">${escapeHtml(score)} pts</div>
             </div>
         `;
     }

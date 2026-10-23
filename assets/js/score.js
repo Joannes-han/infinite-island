@@ -1,4 +1,5 @@
 import { supabase } from './supabase.js';
+import { escapeHtml } from './safe-render.js';
 // ★ 테마 매니저 연결 (index.html과 동일하게)
 import { initTheme, setupThemeToggle } from './theme-manager.js';
 
@@ -123,14 +124,14 @@ function renderInputTable() {
         tr.innerHTML = `
             <td>
                 <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:2px;">
-                    Team ${team.id}
+                    Team ${escapeHtml(team.id)}
                 </div>
 
                 <div style="font-size:1.05rem; font-weight:800; color:var(--text-main);">
-                    ${team.members.join(', ')}
+                    ${escapeHtml(team.members.join(', '))}
                 </div>
             </td>
-            <td class="col-total-preview" id="preview-total-${team.id}" style="font-weight:bold; color:var(--accent-gold);">${total}</td>
+            <td class="col-total-preview" id="preview-total-${escapeHtml(team.id)}" style="font-weight:bold; color:var(--accent-gold);">${escapeHtml(total)}</td>
         `;
 
         // 라운드별 입력칸
@@ -139,8 +140,8 @@ function renderInputTable() {
             const td = document.createElement('td');
             td.innerHTML = `
                 <input type="number" class="score-input" 
-                    data-team="${team.id}" data-round="${r}" 
-                    value="${score}" 
+                    data-team="${escapeHtml(team.id)}" data-round="${r}"
+                    value="${escapeHtml(score)}"
                     onfocus="this.select()">
             `;
             tr.appendChild(td);
@@ -200,17 +201,17 @@ function renderLeaderboard() {
             <td class="col-rank rank-${index + 1}">${index + 1}</td>
             <td class="col-team">
                 <span class="team-name" style="display:block; font-size:0.8rem; color:var(--text-muted); margin-bottom:2px;">
-                    Team ${team.id}
+                    Team ${escapeHtml(team.id)}
                 </span>
 
                 <div style="font-size:1.1rem; font-weight:800; color:var(--text-main); line-height:1.2;">
-                    ${team.members.join(', ')}
+                    ${escapeHtml(team.members.join(', '))}
                 </div>
             </td>
             <td class="col-check" style="display: ${isCpEnabled ? 'table-cell' : 'none'}">
                 ${isReached ? '<i class="fa-solid fa-fire" style="color:#ff4757"></i>' : ''}
             </td>
-            <td class="col-total" style="font-weight:bold; font-size:1.2rem;">${team.total}</td>
+            <td class="col-total" style="font-weight:bold; font-size:1.2rem;">${escapeHtml(team.total)}</td>
         `;
         tbody.appendChild(tr);
     });

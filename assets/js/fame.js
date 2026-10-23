@@ -1,4 +1,5 @@
 import { supabase } from './supabase.js';
+import { escapeHtml } from './safe-render.js';
 
 let allHistory = [];
 let currentPage = 1;
@@ -71,9 +72,9 @@ function renderHistoryPage(page) {
                 detailsHtml += `
                     <tr>
                         <td class="mini-rank">${idx + 1}</td>
-                        <td>Team ${team.id || '-'}</td>
-                        <td style="color:#888">${teamMembers}</td>
-                        <td class="mini-score">${team.total}</td>
+                        <td>Team ${escapeHtml(team.id || '-')}</td>
+                        <td style="color:#888">${escapeHtml(teamMembers)}</td>
+                        <td class="mini-score">${escapeHtml(team.total)}</td>
                     </tr>
                 `;
             });
@@ -89,13 +90,13 @@ function renderHistoryPage(page) {
             <div class="history-summary">
                 <div class="info">
                     <div class="history-date">${dateStr}</div>
-                    <div class="history-team">${record.team_name || 'Team?'}</div>
+                    <div class="history-team">${escapeHtml(record.team_name || 'Team?')}</div>
                     <div class="history-members">
-                        <i class="fa-solid fa-users"></i> ${membersStr}
+                        <i class="fa-solid fa-users"></i> ${escapeHtml(membersStr)}
                     </div>
                 </div>
                 <div class="history-score">
-                    ${record.total_score || 0}<span>pts</span>
+                    ${escapeHtml(record.total_score || 0)}<span>pts</span>
                     <div style="font-size:10px; color:#555; text-align:right; margin-top:5px;">▼ Click</div>
                 </div>
             </div>
@@ -152,7 +153,7 @@ function setupPaginationEvents() {
 
 // ★ 수정된 함수 (const -> let)
 function calculateAndRenderRanking(history) {
-    const winCounts = {};
+    const winCounts = Object.create(null);
 
     history.forEach(record => {
         if (!record.members) return;
@@ -194,7 +195,7 @@ function calculateAndRenderRanking(history) {
         tr.className = rankClass;
         tr.innerHTML = `
             <td><span class="rank-badge">${realRank}</span></td>
-            <td style="font-weight:600">${p.name}</td>
+            <td style="font-weight:600">${escapeHtml(p.name)}</td>
             <td class="win-count">${p.count}회</td>
         `;
         tbody.appendChild(tr);
