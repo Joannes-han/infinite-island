@@ -6,8 +6,7 @@ const protectedPages = [
     'draft.html',
     'attendance.html',
     'tiers.html',
-    'score.html',
-    'inquiry.html'
+    'score.html'
 ];
 
 // 현재 페이지 파일명 가져오기 (예: index.html)

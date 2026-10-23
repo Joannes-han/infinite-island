@@ -1,4 +1,5 @@
 import { supabase } from './supabase.js';
+import { escapeHtml, safeHttpUrl } from './safe-render.js';
 import { initTheme, setupThemeToggle } from './theme-manager.js';
 
 // 티어 정렬 순서
@@ -101,7 +102,7 @@ function renderColumn(container, players, type) {
         const countColor = count === 0 ? 'var(--text-muted)' : 'var(--text-main)';
         
         header.innerHTML = `
-            <span class="tier-name">${displayTierName}</span>
+            <span class="tier-name">${escapeHtml(displayTierName)}</span>
             <span class="tier-count" style="color:${countColor}">${count}</span>
         `;
         groupWrapper.appendChild(header);
@@ -120,19 +121,20 @@ function renderColumn(container, players, type) {
 
                 card.onclick = () => movePlayerOptimistic(player, type);
 
-                const imgHtml = player.image_url 
-                    ? `<img src="${player.image_url}" class="att-card-img" alt="${player.name}">` 
+                const imageUrl = safeHttpUrl(player.image_url);
+                const imgHtml = imageUrl
+                    ? `<img src="${escapeHtml(imageUrl)}" class="att-card-img" alt="${escapeHtml(player.name)}">`
                     : `<div class="att-card-img-placeholder"><i class="fa-solid fa-user"></i></div>`;
 
                 const badgeText = player.tier || '-';
-                const tierClass = player.tier ? `badge-${player.tier.toLowerCase()}` : 'badge-unranked';
+                const tierClass = player.tier ? `badge-${escapeHtml(player.tier.toLowerCase())}` : 'badge-unranked';
 
                 card.innerHTML = `
                     <div class="att-card-left">
                         ${imgHtml}
                         <div class="att-info">
-                            <span class="att-name">${player.name}</span>
-                            <span class="att-tier ${tierClass}">${badgeText}</span>
+                            <span class="att-name">${escapeHtml(player.name)}</span>
+                            <span class="att-tier ${tierClass}">${escapeHtml(badgeText)}</span>
                         </div>
                     </div>
                     <div class="att-card-right">

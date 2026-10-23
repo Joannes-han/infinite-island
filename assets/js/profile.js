@@ -1,4 +1,5 @@
 import { supabase } from './supabase.js';
+import { escapeHtml, safeHttpUrl } from './safe-render.js';
 
 let allPlayers = [];
 let hallOfFameData = [];
@@ -186,7 +187,8 @@ function renderTable(players) {
 
     players.forEach(p => {
         const tr = document.createElement('tr');
-        const imgHtml = p.image_url ? `<img src="${p.image_url}">` : `<i class="fa-solid fa-user" style="color:#555"></i>`;
+        const imageUrl = safeHttpUrl(p.image_url);
+        const imgHtml = imageUrl ? `<img src="${escapeHtml(imageUrl)}">` : `<i class="fa-solid fa-user" style="color:#555"></i>`;
 
         // 테이블 목록에서 티어 한글 변환
         let displayTier = p.tier || '-';
@@ -197,10 +199,10 @@ function renderTable(players) {
             <td>
                 <div class="td-player-info">
                     <div class="td-img">${imgHtml}</div>
-                    <span class="td-name">${p.name}</span>
+                    <span class="td-name">${escapeHtml(p.name)}</span>
                 </div>
             </td>
-            <td style="color:var(--accent-gold); font-weight:bold;">${displayTier}</td>
+            <td style="color:var(--accent-gold); font-weight:bold;">${escapeHtml(displayTier)}</td>
             <td>${p.totalGames}</td>
             <td>${p.totalWins}</td>
             <td class="text-win-rate">${p.winRate}%</td>
@@ -230,7 +232,8 @@ function openModal(player) {
     document.getElementById('pCost').textContent = `${player.cost || 0} 코스트`;
     
     const imgBox = document.getElementById('pImg');
-    imgBox.innerHTML = player.image_url ? `<img src="${player.image_url}">` : `<i class="fa-solid fa-user"></i>`;
+    const imageUrl = safeHttpUrl(player.image_url);
+    imgBox.innerHTML = imageUrl ? `<img src="${escapeHtml(imageUrl)}">` : `<i class="fa-solid fa-user"></i>`;
 
     document.getElementById('statTotal').textContent = player.totalGames;
     document.getElementById('statWins').textContent = player.totalWins;
@@ -253,11 +256,11 @@ function openModal(player) {
 
             div.innerHTML = `
                 <div class="match-info">
-                    <div class="match-title">${match.title || 'Round'}</div> <div class="match-team"><i class="fa-solid fa-users"></i> ${match.members}</div>
+                    <div class="match-title">${escapeHtml(match.title || 'Round')}</div> <div class="match-team"><i class="fa-solid fa-users"></i> ${escapeHtml(match.members)}</div>
                     <div class="match-date">${match.date}</div>
                 </div>
                 <div class="match-rank ${rankClass}">
-                    ${match.rank < 99 ? match.rank + '위' : (match.rankText || '-')}
+                    ${escapeHtml(match.rank < 99 ? match.rank + '위' : (match.rankText || '-'))}
                 </div>
             `;
             listContainer.appendChild(div);

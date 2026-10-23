@@ -1,4 +1,5 @@
 import { supabase } from './supabase.js';
+import { escapeHtml, safeHttpUrl } from './safe-render.js';
 
 let allPlayers = [];
 // ★ [수정 1] 저장된 팀 개수가 있으면 그걸 쓰고, 없으면 기본 6개
@@ -109,17 +110,18 @@ function createPlayerChip(player) {
     if (displayTier === 'Chicken') displayTier = '닭';
     if (displayTier === 'Stick') displayTier = '나뭇가지';
 
-    const imgContent = player.image_url
-        ? `<img src="${player.image_url}" style="width:100%; height:100%; object-fit:cover;">`
+    const imageUrl = safeHttpUrl(player.image_url);
+    const imgContent = imageUrl
+        ? `<img src="${escapeHtml(imageUrl)}" style="width:100%; height:100%; object-fit:cover;">`
         : `<i class="fa-solid fa-user"></i>`;
 
     div.innerHTML = `
         <div class="chip-img-box">${imgContent}</div>
         <div class="chip-info">
-            <span class="chip-name">${player.name}</span>
+            <span class="chip-name">${escapeHtml(player.name)}</span>
             <div class="chip-meta">
-                <span class="chip-tier" style="color:var(--accent-gold)">${displayTier}</span>
-                <span class="chip-cost" style="color:#aaa; margin-left:4px;">(${player.cost})</span>
+                <span class="chip-tier" style="color:var(--accent-gold)">${escapeHtml(displayTier)}</span>
+                <span class="chip-cost" style="color:#aaa; margin-left:4px;">(${escapeHtml(player.cost)})</span>
             </div>
         </div>
     `;

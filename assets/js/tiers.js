@@ -1,4 +1,5 @@
 import { supabase } from './supabase.js';
+import { escapeHtml, safeHttpUrl } from './safe-render.js';
 
 // ==========================================
 // 1. 초기화 (페이지 로드 시 실행)
@@ -74,14 +75,15 @@ function createPlayerCard(player) {
     // ★ [수정됨] 텍스트만 넣던 것을 -> 이미지 HTML 포함으로 변경
     
     // 1. 이미지가 있으면 img 태그, 없으면 기본 아이콘
-    const imgHtml = player.image_url 
-        ? `<img src="${player.image_url}" class="tier-player-img" alt="${player.name}" draggable="false">` 
+    const imageUrl = safeHttpUrl(player.image_url);
+    const imgHtml = imageUrl
+        ? `<img src="${escapeHtml(imageUrl)}" class="tier-player-img" alt="${escapeHtml(player.name)}" draggable="false">`
         : `<div class="tier-player-placeholder"><i class="fa-solid fa-user"></i></div>`;
 
     // 2. HTML 조립 (이미지 + 이름)
     div.innerHTML = `
         ${imgHtml}
-        <span class="player-name">${player.name}</span>
+        <span class="player-name">${escapeHtml(player.name)}</span>
     `;
 
     // 드래그 가능하게 설정
